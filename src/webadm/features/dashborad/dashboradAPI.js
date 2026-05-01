@@ -27,7 +27,7 @@ export const dashboradAPI = {
 
   // NEW ↓ — custom date range
   topcardsByDateRange: (startDate, endDate) =>
-    api.post("/adm/filter_with_date_range", {
+    api.post("/adm/filter_order_with_date_range", {
       start_date: startDate,
       ...(endDate && { end_date: endDate }),
     }),

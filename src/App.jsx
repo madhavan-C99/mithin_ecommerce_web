@@ -1,8 +1,9 @@
+// // 📁 src/App.jsx
+
 // import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 // import { useEffect, useState } from "react";
 // import { useDispatch } from "react-redux";
-// import { Outlet } from "react-router-dom"
-
+// import { Outlet } from "react-router-dom";
 
 // import ShippingPolicy from "./webapp/pages/ShippingPolicyPage";
 // import RefundPolicy from "./webapp/pages/RefundPolicyPage";
@@ -30,13 +31,11 @@
 // import DistanceGlobalNotify from "./webapp/components/distancenotify/DistanceGlobalNotify";
 // import { loadDeliveryFromStorage } from "./webapp/store/DeliverySlice";
 // import ScrollToTop from "./webapp/components/scrolltotop/ScrollToTop";
-
 // import { FlyToCartProvider } from "./webapp/components/flytocart/FlyToCartContext";
 
-
-// // delivery routes
-
-
+// // ✅ DELIVERY — Auth context + Routes
+// import { DeliveryAuthProvider } from "./webdelivery/context/DeliveryAuthContext";
+// import DeliveryRoutes from "./webdelivery/routes/DeliveryRoutes";
 
 
 // /* 🔥 Separate component for routing logic */
@@ -45,10 +44,10 @@
 //   const location = useLocation();
 //   const state = location.state;
 //   const backgroundLocation = state?.background;
-//   const isAdminRoute = location.pathname.startsWith(`/${import.meta.env.VITE_ADMIN_PATH}`); // ✅ CHANGE 1: moved from App()
+//   const isAdminRoute = location.pathname.startsWith(`/${import.meta.env.VITE_ADMIN_PATH}`);
+//   const isDeliveryRoute = location.pathname.startsWith("/delivery"); // ✅ skip popup for delivery pages
 //   const adminPath = import.meta.env.VITE_ADMIN_PATH;
 
-//   // ✅ CHANGE 2: moved popup state + logic from App() to here
 //   const [openPopup, setOpenPopup] = useState(false);
 //   const dispatch = useDispatch();
 
@@ -57,7 +56,7 @@
 //   }, []);
 
 //   useEffect(() => {
-//     if (isAdminRoute) return; // skip popup for admin pages
+//     if (isAdminRoute || isDeliveryRoute) return; // ✅ skip popup on admin + delivery pages
 
 //     const popupShown = sessionStorage.getItem("deliveryPopupShown");
 //     if (popupShown) return;
@@ -68,13 +67,11 @@
 //     }, 8000);
 
 //     return () => clearTimeout(timer);
-//   }, [isAdminRoute]);
+//   }, [isAdminRoute, isDeliveryRoute]);
 
 //   return (
 //     <>
-//       {/* MAIN ROUTES - background location use pannunga modal-ku */}
-//       {/* <Routes location={backgroundLocation || location}> */}
-//       <ScrollToTop/>
+//       <ScrollToTop />
 //       <Routes location={isAdminRoute ? location : (backgroundLocation || location)}>
 
 //         <Route path="/terms" element={<TermsPage />} />
@@ -105,8 +102,8 @@
 //         <Route path="/order-tracking" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
 //         <Route path="/order-confirmation" element={<ProtectedRoute><OrderConfirmationPage /></ProtectedRoute>} />
 
-//         {/* ✅ ADMIN  */}
-//           <Route
+//         {/* ADMIN */}
+//         <Route
 //           path={`/${adminPath}`}
 //           element={
 //             <AdminAuthProvider>
@@ -120,22 +117,14 @@
 //           <Route path="dashboard" element={<DashboardLayout />} />
 //         </Route>
 
-
-        
-
-
-
-
-
-
-//         {/* AUTH - background இல்லாம் direct navigate பண்ணா full page show */}
+//         {/* AUTH */}
 //         <Route path="/login" element={<AuthModal type="login" />} />
 //         <Route path="/verify-otp" element={<AuthModal type="otp" />} />
 //         <Route path="/signup" element={<AuthModal type="signup" />} />
 
 //       </Routes>
 
-//       {/* 🔥 MODAL OVERLAY - background இருந்தா மட்டும் render */}
+//       {/* MODAL OVERLAY */}
 //       {backgroundLocation && (
 //         <Routes>
 //           <Route path="/login" element={<AuthModal type="login" />} />
@@ -144,8 +133,13 @@
 //         </Routes>
 //       )}
 
-//       {/* ✅ CHANGE 3: popup only renders for non-admin routes */}
-//       {!isAdminRoute && (
+//       {/* ✅ DELIVERY — isolated inside its own auth context */}
+//       <DeliveryAuthProvider>
+//         <DeliveryRoutes />
+//       </DeliveryAuthProvider>
+
+//       {/* Popup — skip on admin + delivery pages */}
+//       {!isAdminRoute && !isDeliveryRoute && (
 //         <DeliveryInfoDialog
 //           open={openPopup}
 //           onClose={() => setOpenPopup(false)}
@@ -159,12 +153,10 @@
 // function App() {
 //   return (
 //     <BrowserRouter>
-//     <FlyToCartProvider>
-//       <AppRoutes />
-
-//       <CartDrawer />
-//       <DistanceGlobalNotify />
-
+//       <FlyToCartProvider>
+//         <AppRoutes />
+//         <CartDrawer />
+//         <DistanceGlobalNotify />
 //       </FlyToCartProvider>
 //     </BrowserRouter>
 //   );
@@ -217,19 +209,17 @@ import { loadDeliveryFromStorage } from "./webapp/store/DeliverySlice";
 import ScrollToTop from "./webapp/components/scrolltotop/ScrollToTop";
 import { FlyToCartProvider } from "./webapp/components/flytocart/FlyToCartContext";
 
-// ✅ DELIVERY — Auth context + Routes
+// ✅ DELIVERY
 import { DeliveryAuthProvider } from "./webdelivery/context/DeliveryAuthContext";
 import DeliveryRoutes from "./webdelivery/routes/DeliveryRoutes";
 
-
-/* 🔥 Separate component for routing logic */
-
+/* ─── AppRoutes ─────────────────────────────────────────── */
 function AppRoutes() {
   const location = useLocation();
   const state = location.state;
   const backgroundLocation = state?.background;
   const isAdminRoute = location.pathname.startsWith(`/${import.meta.env.VITE_ADMIN_PATH}`);
-  const isDeliveryRoute = location.pathname.startsWith("/delivery"); // ✅ skip popup for delivery pages
+  const isDeliveryRoute = location.pathname.startsWith("/delivery");
   const adminPath = import.meta.env.VITE_ADMIN_PATH;
 
   const [openPopup, setOpenPopup] = useState(false);
@@ -240,7 +230,7 @@ function AppRoutes() {
   }, []);
 
   useEffect(() => {
-    if (isAdminRoute || isDeliveryRoute) return; // ✅ skip popup on admin + delivery pages
+    if (isAdminRoute || isDeliveryRoute) return;
 
     const popupShown = sessionStorage.getItem("deliveryPopupShown");
     if (popupShown) return;
@@ -256,13 +246,32 @@ function AppRoutes() {
   return (
     <>
       <ScrollToTop />
+
+      {/*
+       * ✅ FIX: DeliveryRoutes is now a proper wildcard route INSIDE the main
+       * Routes block, wrapped in its own DeliveryAuthProvider via the Outlet
+       * pattern. Previously it was a floating sibling rendered unconditionally
+       * alongside every other page — causing double renders and layout conflicts
+       * on all /delivery/* paths.
+       */}
       <Routes location={isAdminRoute ? location : (backgroundLocation || location)}>
 
+        {/* ── DELIVERY (catch-all for /delivery/*) ── */}
+        <Route
+          path="/delivery/*"
+          element={
+            <DeliveryAuthProvider>
+              <DeliveryRoutes />
+            </DeliveryAuthProvider>
+          }
+        />
+
+        {/* ── STATIC PAGES ── */}
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/shipping-policy" element={<ShippingPolicy />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
 
-        {/* MAIN */}
+        {/* ── MAIN ── */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />
@@ -272,7 +281,7 @@ function AppRoutes() {
           <Route path="/cart" element={null} />
         </Route>
 
-        {/* ACCOUNT */}
+        {/* ── ACCOUNT ── */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AccountLayout />}>
             <Route path="/account/profile" element={<ProfilePage />} />
@@ -281,12 +290,12 @@ function AppRoutes() {
           </Route>
         </Route>
 
-        {/* CHECKOUT */}
+        {/* ── CHECKOUT ── */}
         <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
         <Route path="/order-tracking" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
         <Route path="/order-confirmation" element={<ProtectedRoute><OrderConfirmationPage /></ProtectedRoute>} />
 
-        {/* ADMIN */}
+        {/* ── ADMIN ── */}
         <Route
           path={`/${adminPath}`}
           element={
@@ -301,14 +310,14 @@ function AppRoutes() {
           <Route path="dashboard" element={<DashboardLayout />} />
         </Route>
 
-        {/* AUTH */}
+        {/* ── AUTH ── */}
         <Route path="/login" element={<AuthModal type="login" />} />
         <Route path="/verify-otp" element={<AuthModal type="otp" />} />
         <Route path="/signup" element={<AuthModal type="signup" />} />
 
       </Routes>
 
-      {/* MODAL OVERLAY */}
+      {/* Modal overlay for background routes */}
       {backgroundLocation && (
         <Routes>
           <Route path="/login" element={<AuthModal type="login" />} />
@@ -316,11 +325,6 @@ function AppRoutes() {
           <Route path="/signup" element={<AuthModal type="signup" />} />
         </Routes>
       )}
-
-      {/* ✅ DELIVERY — isolated inside its own auth context */}
-      <DeliveryAuthProvider>
-        <DeliveryRoutes />
-      </DeliveryAuthProvider>
 
       {/* Popup — skip on admin + delivery pages */}
       {!isAdminRoute && !isDeliveryRoute && (
@@ -333,7 +337,7 @@ function AppRoutes() {
   );
 }
 
-/* 🔥 ROOT */
+/* ─── ROOT ──────────────────────────────────────────────── */
 function App() {
   return (
     <BrowserRouter>

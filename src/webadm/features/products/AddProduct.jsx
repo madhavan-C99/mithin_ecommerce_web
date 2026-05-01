@@ -764,7 +764,7 @@ const buttonStyle = {
   textTransform: "none",
 };
 
-const AddProduct = ({ close }) => {
+const AddProduct = ({ close, onSuccess, onError }) => {
   const { addProductApi } = useAuth();
 
   const [subcatdrop, setsubCatdrop] = useState([]);
@@ -833,6 +833,18 @@ const AddProduct = ({ close }) => {
     return Object.keys(temp).length === 0;
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!validate()) return;
+
+  //   const formData = new FormData();
+  //   Object.entries(form).forEach(([k, v]) => formData.append(k, v));
+
+  //   await productsAPI.addProductApi(formData);
+  //   close();
+  // };
+
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
@@ -840,9 +852,17 @@ const AddProduct = ({ close }) => {
     const formData = new FormData();
     Object.entries(form).forEach(([k, v]) => formData.append(k, v));
 
-    await productsAPI.addProductApi(formData);
-    close();
+    try {
+      await productsAPI.addProductApi(formData);
+      onSuccess(); // closes modal + refreshes table + shows success toast
+    } catch (err) {
+      const message =
+        err?.response?.data?.data?.message || "Something went wrong";
+      onError(message); // shows error toast, modal stays open
+    }
   };
+
+
 
   const resetForm = () => {
     setForm({});
@@ -1016,7 +1036,7 @@ const AddProduct = ({ close }) => {
           <Divider sx={{ my: 2 }} />
 
           {/* DESCRIPTION */}
-          <TextField label="Description" multiline rows={3} fullWidth
+          <TextField label="Description" name="description" multiline rows={3} fullWidth
             value={form.description} onChange={handleChange}
             sx={inputStyle}/>
 

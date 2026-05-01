@@ -1069,7 +1069,7 @@ const CusUser = () => {
 
                       <TableCell align="center" sx={{ color: "#555" }}>
                         <IconButton
-                          onClick={() => handleEditClick(user.id, user.role)}
+                          onClick={() => handleEditClick(user.user_id, user.role)}
                           size="small"
                           sx={{
                             p: { xs: "4px", sm: "6px", md: "8px" }

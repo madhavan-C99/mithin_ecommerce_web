@@ -788,7 +788,7 @@ function OrderCard({ order }) {
       }}
     >
       {/* ── Card Header ── */}
-      <Box
+      {/* <Box
         sx={{
           px: { xs: 1.8, sm: 2.5 },
           py: { xs: 1.4, sm: 1.8 },
@@ -825,10 +825,10 @@ function OrderCard({ order }) {
           >
             Ref: {order.order_number}
           </Typography>
-        </Box>
+        </Box> */}
 
         {/* Chip — flexShrink:0 so it never squishes */}
-        <Chip
+        {/* <Chip
           icon={config.icon}
           label={order.status}
           size="small"
@@ -844,7 +844,115 @@ function OrderCard({ order }) {
             "& .MuiChip-icon": { color: config.color },
           }}
         />
-      </Box>
+      </Box> */}
+
+      {/* ── Card Header ── */}
+<Box
+  sx={{
+    px: { xs: 1.8, sm: 2.5 },
+    py: { xs: 1.4, sm: 1.8 },
+    background: `linear-gradient(135deg, ${config.bg} 0%, #FAFAFA 100%)`,
+    borderBottom: "1px solid #F0F0F0",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 1,
+    flexWrap: "wrap",
+  }}
+>
+  {/* Left — order number */}
+  <Box sx={{ minWidth: 0, flex: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+      <Receipt sx={{ fontSize: { xs: 14, sm: 16 }, color: config.color, flexShrink: 0 }} />
+      <Typography
+        noWrap
+        sx={{
+          fontWeight: 700,
+          fontSize: { xs: "0.82rem", sm: "0.95rem" },
+          fontFamily: "'DM Sans', sans-serif",
+          color: "#1A1A1A",
+        }}
+      >
+        {order.order_number}
+      </Typography>
+    </Box>
+    <Typography
+      sx={{
+        fontSize: { xs: "0.68rem", sm: "0.72rem" },
+        color: "#9E9E9E",
+        mt: 0.2,
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      Ref: {order.order_number}
+    </Typography>
+  </Box>
+
+  {/* OTP Badge — always visible, right of order info */}
+  {order.otp && (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.6,
+        bgcolor: "#FFF8E1",
+        border: "1.5px dashed #FFC107",
+        borderRadius: "8px",
+        px: { xs: 1, sm: 1.4 },
+        py: { xs: 0.4, sm: 0.5 },
+        flexShrink: 0,
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: { xs: "0.6rem", sm: "0.65rem" },
+          fontWeight: 600,
+          color: "#F57F17",
+          textTransform: "uppercase",
+          letterSpacing: 0.6,
+          fontFamily: "'DM Sans', sans-serif",
+          lineHeight: 1,
+        }}
+      >
+        OTP
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: { xs: "0.82rem", sm: "0.9rem" },
+          fontWeight: 800,
+          color: "#E65100",
+          fontFamily: "'DM Sans', sans-serif",
+          letterSpacing: 2,
+          lineHeight: 1,
+        }}
+      >
+        {order.otp}
+      </Typography>
+    </Box>
+  )}
+
+  {/* Status Chip — far right */}
+  <Chip
+    icon={config.icon}
+    label={order.status}
+    size="small"
+    sx={{
+      flexShrink: 0,
+      bgcolor: config.bg,
+      color: config.color,
+      fontWeight: 700,
+      fontSize: { xs: "0.65rem", sm: "0.72rem" },
+      height: { xs: 22, sm: 24 },
+      border: `1.5px solid ${config.color}40`,
+      fontFamily: "'DM Sans', sans-serif",
+      "& .MuiChip-icon": { color: config.color },
+    }}
+  />
+</Box>
+
+
+
+
 
       {/* ── Stepper ── */}
       <Box sx={{ px: { xs: 1.5, sm: 2.5 }, pt: 1.5, pb: 0.5 }}>
@@ -929,7 +1037,7 @@ function OrderCard({ order }) {
                       fontFamily: "'DM Sans', sans-serif",
                     }}
                   >
-                    {item.weight} kg
+                    {item.weight} {item.unit}
                   </Typography>
                 )}
               </Box>

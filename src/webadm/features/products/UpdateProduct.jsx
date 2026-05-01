@@ -1570,7 +1570,7 @@ const UpdateProducts = ({ product, close, refresh }) => {
     category_id: "",
     current_trending_status: false,
     status: false,
-    expiry_date: "",
+    // expiry_date: "",
     weight: "",
     description: "",
     product_img: "",
@@ -1603,7 +1603,7 @@ const UpdateProducts = ({ product, close, refresh }) => {
       category_id: matchedCategory ? String(matchedCategory.value) : "",
       status: products_select.status ?? false,
       current_trending_status: products_select.current_trending_status ?? false,
-      expiry_date: products_select.expiry_date || "",
+      // expiry_date: products_select.expiry_date || "",
       weight: products_select.weight || "",
       description: products_select.description || "",
       product_img: products_select.product_img || "",
@@ -1618,7 +1618,8 @@ const UpdateProducts = ({ product, close, refresh }) => {
   const RefreshForm = () => {
     setForm({
       name: "", tamil_name: "", price: "", stock: "",
-      subcategory_id: "", category_id: "", expiry_date: "",
+      subcategory_id: "", category_id: "", 
+      //expiry_date: "",
       current_trending_status: false, status: false,
       weight: "", description: "", product_img: "", unit: "",
     });
@@ -1694,7 +1695,7 @@ const UpdateProducts = ({ product, close, refresh }) => {
     if (!form.price) tempErrors.price = "Price is required";
     if (!form.stock) tempErrors.stock = "Stock is required";
     if (!form.category_id) tempErrors.category_id = "Select a category";
-    if (!form.expiry_date) tempErrors.expiry_date = "Select expiry date";
+    // if (!form.expiry_date) tempErrors.expiry_date = "Select expiry date";
     if (!form.weight) tempErrors.weight = "Weight is required";
     if (!form.unit) tempErrors.unit = "Unit is required";
     if (!form.product_img && !preview) tempErrors.product_img = "Please upload product image";
@@ -1716,7 +1717,7 @@ const UpdateProducts = ({ product, close, refresh }) => {
       formData.append("stock", Number(form.stock));
       formData.append("category_id", Number(form.category_id));
       formData.append("weight", Number(form.weight));
-      formData.append("expiry_date", form.expiry_date);
+      // formData.append("expiry_date", form.expiry_date);
       formData.append("status", form.status);
       formData.append("current_trending_status", form.current_trending_status);
       formData.append("description", form.description);
@@ -1729,6 +1730,7 @@ const UpdateProducts = ({ product, close, refresh }) => {
       }
       await productsAPI.updateProduct(formData);
       close();
+      refresh(); 
     } catch (error) {
       console.error("Update error:", error.response?.data);
     }
