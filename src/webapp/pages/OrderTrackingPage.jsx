@@ -647,7 +647,7 @@ const STATUS_CONFIG = {
     icon: <CheckCircle sx={{ fontSize: 14 }} />,
     step: 1,
   },
-  Out_For_Delivery: {
+  OutForDelivery: {
     color: "#7B1FA2",
     bg: "#F3E5F5",
     icon: <DirectionsBike sx={{ fontSize: 14 }} />,
@@ -661,14 +661,15 @@ const STATUS_CONFIG = {
   },
 };
 
-const STEPS = ["Pending", "Confirmed", "Out for\nDelivery", "Delivered"];
-const STEP_KEYS = ["Pending", "Confirmed", "Out_For_Delivery", "Delivered"];
+const STEPS = ["Pending", "Confirmed", "Out For Delivery", "Delivered"];
+const STEP_KEYS = ["Pending", "Confirmed", "Out For Delivery", "Delivered"];
 
 // ─── Progress Stepper ─────────────────────────────────────────────────────────
 function OrderStepper({ status }) {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG["Pending"];
+  console.log("orderstep",config)
   const currentStep = config.step;
-
+  console.log("cuurentstep",currentStep)
   return (
     <Box sx={{ mt: 2, mb: 1, px: { xs: 0.5, sm: 1 } }}>
       <Box
@@ -772,6 +773,8 @@ function OrderStepper({ status }) {
 // ─── Single Order Card ────────────────────────────────────────────────────────
 function OrderCard({ order }) {
   const config = STATUS_CONFIG[order.status] || STATUS_CONFIG["Pending"];
+  console.log("ordercard_stats",config)
+
 
   return (
     <Paper

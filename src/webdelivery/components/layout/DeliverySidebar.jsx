@@ -20,7 +20,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useDeliveryAuth from "../../hooks/useDeliveryAuth";
 
 export const SIDEBAR_WIDTH = 260;
-
+  const deliveryPath= import.meta.env.VITE_DELIVERY_PATH
 /**
  * ✅ Route paths fixed to match DeliveryRoutes.jsx:
  *   /delivery/dashboard
@@ -33,17 +33,17 @@ const navItems = [
   {
     label: "Dashboard",
     icon: <DashboardRoundedIcon fontSize="small" />,
-    path: "/delivery/dashboard",
+    path: `/${deliveryPath}/dashboard`,
   },
   {
     label: "Current Orders",
     icon: <LocalShippingRoundedIcon fontSize="small" />,
-    path: "/delivery/orders",
+    path: `/${deliveryPath}/orders`,
   },
   {
     label: "Order History",
     icon: <HistoryRoundedIcon fontSize="small" />,
-    path: "/delivery/history",
+    path: `/${deliveryPath}/history`,
   },
 ];
 
@@ -60,7 +60,7 @@ const DeliverySidebar = ({ mobileOpen, onClose }) => {
   // ✅ Real logout — clears context + localStorage
   const handleLogout = () => {
     logout();
-    navigate("/delivery/login");
+    navigate(`/${deliveryPath}/login`);
   };
 
   const drawerContent = (

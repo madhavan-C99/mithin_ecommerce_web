@@ -208,7 +208,7 @@ import DistanceGlobalNotify from "./webapp/components/distancenotify/DistanceGlo
 import { loadDeliveryFromStorage } from "./webapp/store/DeliverySlice";
 import ScrollToTop from "./webapp/components/scrolltotop/ScrollToTop";
 import { FlyToCartProvider } from "./webapp/components/flytocart/FlyToCartContext";
-
+// import { useDispatch, useSelector } from "react-redux"; // useSelector add பண்ணு
 // ✅ DELIVERY
 import { DeliveryAuthProvider } from "./webdelivery/context/DeliveryAuthContext";
 import DeliveryRoutes from "./webdelivery/routes/DeliveryRoutes";
@@ -219,9 +219,11 @@ function AppRoutes() {
   const state = location.state;
   const backgroundLocation = state?.background;
   const isAdminRoute = location.pathname.startsWith(`/${import.meta.env.VITE_ADMIN_PATH}`);
-  const isDeliveryRoute = location.pathname.startsWith("/delivery");
+  const isDeliveryRoute = location.pathname.startsWith(`/${import.meta.env.VITE_DELIVERY_PATH}`);
   const adminPath = import.meta.env.VITE_ADMIN_PATH;
-
+  console.log(adminPath)
+  const deliveryPath= import.meta.env.VITE_DELIVERY_PATH
+  console.log(deliveryPath)
   const [openPopup, setOpenPopup] = useState(false);
   const dispatch = useDispatch();
 
@@ -232,13 +234,16 @@ function AppRoutes() {
   useEffect(() => {
     if (isAdminRoute || isDeliveryRoute) return;
 
-    const popupShown = sessionStorage.getItem("deliveryPopupShown");
+    const isLoggedIn = localStorage.getItem("isLoggedIn"); // ✅ add
+    if (isLoggedIn) return;       
+
+    const popupShown = sessionStorage.getItem("deliveryPopupShown"); 
     if (popupShown) return;
 
     const timer = setTimeout(() => {
       setOpenPopup(true);
       sessionStorage.setItem("deliveryPopupShown", "true");
-    }, 8000);
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, [isAdminRoute, isDeliveryRoute]);
@@ -258,7 +263,7 @@ function AppRoutes() {
 
         {/* ── DELIVERY (catch-all for /delivery/*) ── */}
         <Route
-          path="/delivery/*"
+          path={`/${deliveryPath}/*`}
           element={
             <DeliveryAuthProvider>
               <DeliveryRoutes />

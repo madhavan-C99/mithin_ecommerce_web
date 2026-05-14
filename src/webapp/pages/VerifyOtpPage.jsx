@@ -248,7 +248,6 @@ const VerifyOtp = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-
   const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -326,7 +325,7 @@ const VerifyOtp = () => {
       }
 
       login(response.token, response.user);
-
+      localStorage.setItem("isLoggedIn", "true");
       if (response.is_new_user) {
         navigate("/signup", { state: { openMap: location.state?.openMap } });
       } else {

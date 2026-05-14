@@ -200,6 +200,9 @@ export const ProductList = ({ product }) => {
   // ── LOGIC: untouched ────────────────────────────────────────────────────────
   const processedProduct = product || [];
   const total_amount = processedProduct[0]?.total_amount;
+const sub_total = processedProduct.reduce((sum, p) => sum + (p.total_price || 0), 0)
+const delivery_charge = processedProduct[0]?.delivery_charge;
+const grand_total = processedProduct[0]?.grand_total;
   console.log(processedProduct);
   // ── END LOGIC ────────────────────────────────────────────────────────────────
 
@@ -288,30 +291,54 @@ export const ProductList = ({ product }) => {
             )}
           </AnimatePresence>
 
-          {/* ── Total Amount row ── */}
-          {processedProduct.length > 0 && (
-            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-              <TableCell colSpan={5} align="right">
-                <Typography
-                  fontWeight="bold"
-                  fontSize={{ xs: "11px", sm: "12px", md: "13px" }}
-                >
-                  Total Amount
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography
-                  fontWeight="bold"
-                  color="green"
-                  fontSize={{ xs: "11px", sm: "12px", md: "13px" }}
-                  whiteSpace="nowrap"
-                >
-                  ₹ {total_amount}
-                </Typography>
-              </TableCell>
-            </TableRow>
-          )}
 
+{/* ── Sub Total row ── */}
+{processedProduct.length > 0 && (
+  <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+    <TableCell colSpan={5} align="right">
+      <Typography fontWeight="bold" fontSize={{ xs: "11px", sm: "12px", md: "13px" }}>
+        Sub Total
+      </Typography>
+    </TableCell>
+    <TableCell>
+      <Typography fontWeight="bold" color="green" fontSize={{ xs: "11px", sm: "12px", md: "13px" }} whiteSpace="nowrap">
+        ₹ {sub_total}
+      </Typography>
+    </TableCell>
+  </TableRow>
+)}
+
+{/* ── Delivery Charge row ── */}
+{processedProduct.length > 0 && (
+  <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+    <TableCell colSpan={5} align="right">
+      <Typography fontWeight="bold" fontSize={{ xs: "11px", sm: "12px", md: "13px" }}>
+        Delivery Charge
+      </Typography>
+    </TableCell>
+    <TableCell>
+      <Typography fontWeight="bold" color="green" fontSize={{ xs: "11px", sm: "12px", md: "13px" }} whiteSpace="nowrap">
+        ₹ {delivery_charge}
+      </Typography>
+    </TableCell>
+  </TableRow>
+)}
+
+{/* ── Grand Total row ── */}
+{processedProduct.length > 0 && (
+  <TableRow sx={{ backgroundColor: "#ebf5eb" }}>
+    <TableCell colSpan={5} align="right">
+      <Typography fontWeight="bold" fontSize={{ xs: "12px", sm: "13px", md: "14px" }}>
+        Grand Total
+      </Typography>
+    </TableCell>
+    <TableCell>
+      <Typography fontWeight="bold" color="green" fontSize={{ xs: "12px", sm: "13px", md: "14px" }} whiteSpace="nowrap">
+        ₹ {total_amount}
+      </Typography>
+    </TableCell>
+  </TableRow>
+)}
         </TableBody>
       </Table>
     </TableContainer>

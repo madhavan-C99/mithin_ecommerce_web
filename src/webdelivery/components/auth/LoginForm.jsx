@@ -32,6 +32,7 @@ import useDeliveryAuth from "../../hooks/UseDeliveryAuth";
  * API response: { token, user: { user_id, name, mobile, email, roles } }
  */
 const LoginForm = () => {
+   const deliveryPath = import.meta.env.VITE_DELIVERY_PATH;
   const navigate = useNavigate();
   const { login } = useDeliveryAuth();
 
@@ -62,7 +63,8 @@ const LoginForm = () => {
       // response is already unwrapped by Axios interceptor:
       // { status, token, user: { user_id, name, mobile, email, roles }, message }
       login(response.token, response.user);
-      navigate("/delivery/dashboard");
+      localStorage.setItem("isLoggedIn", "true")
+      navigate(`/${deliveryPath}/dashboard`);
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
     } finally {

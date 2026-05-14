@@ -18,13 +18,15 @@ import useDeliveryAuth from "../hooks/useDeliveryAuth";
  */
 const ProtectedDeliveryRoute = ({ children }) => {
   const { isAuthenticated, authLoading } = useDeliveryAuth();
+   const deliveryPath = import.meta.env.VITE_DELIVERY_PATH;
 
   // Wait for session restore to finish before making any redirect decision
   if (authLoading) return null;
 
   if (!isAuthenticated) {
-    return <Navigate to="/delivery/login" replace />;
+    return <Navigate to={`/${deliveryPath}/login`} replace />;
   }
+
 
   return children;
 };

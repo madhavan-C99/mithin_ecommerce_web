@@ -677,7 +677,111 @@ const handleConfirmAccept = async (notification, deliveryBoyId) => {
                         </Box>
                       </Box>
                     )}
+                    {/* ── NEW ORDER ── */}
+                    {n.title === "Reassign Order" && (
+                      <Box
+                        display="flex"
+                        alignItems={{ xs: "flex-start", sm: "center" }}
+                        justifyContent="space-between"
+                        flexDirection={{ xs: "column", sm: "row" }}
+                        gap={{ xs: 2, sm: 2.5 }}
+                      >
+                        {/* Left: order info — UNTOUCHED */}
+                        <Box display="flex" gap={1.5} flex={1} minWidth={0}>
+                          <Box
+                            sx={{
+                              width: 36, height: 36,
+                              borderRadius: "10px",
+                              bgcolor: "#f0faf0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                              mt: 0.3,
+                            }}
+                          >
+                            <ShoppingCartIcon sx={{ color: "#2e7d32", fontSize: 18 }} />
+                          </Box>
 
+                          <Box minWidth={0}>
+                            <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+                              <Typography
+                                fontWeight={700}
+                                fontSize={{ xs: 13, sm: 14, md: 15 }}
+                                color="#1a1a2e"
+                              >
+                                {n.title}
+                              </Typography>
+                              <Box
+                                sx={{
+                                  px: 1, py: 0.2,
+                                  bgcolor: "#e8f5e9",
+                                  color: "#2e7d32",
+                                  borderRadius: "20px",
+                                  fontSize: { xs: 9, sm: 10 },
+                                  fontWeight: 700,
+                                  border: "1px solid #c8e6c9",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                NEW
+                              </Box>
+                            </Box>
+
+                            <Typography
+                              fontSize={{ xs: 12, sm: 13 }}
+                              color="text.secondary"
+                              mt={0.4}
+                              sx={{ wordBreak: "break-word" }}
+                            >
+                              {n.message}
+                            </Typography>
+
+                            <Typography
+                              fontSize={{ xs: 10, sm: 11 }}
+                              color="text.disabled"
+                              mt={0.4}
+                            >
+                              🕐 {n.time_ago}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Right: Accept button
+                            ── CHANGE: onClick now opens dialog instead of directly calling updateStatus ── */}
+                        <Box
+                          display="flex"
+                          gap={1.5}
+                          flexShrink={0}
+                          alignSelf={{ xs: "flex-end", sm: "center" }}
+                          width={{ xs: "100%", sm: "auto" }}
+                          justifyContent={{ xs: "flex-end", sm: "flex-start" }}
+                        >
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() => handleAcceptClick(n)}  //{/* ── CHANGED ── */}
+                            sx={{
+                              px: { xs: 2.5, sm: 3 },
+                              py: 0.8,
+                              borderRadius: "10px",
+                              fontSize: { xs: 11, sm: 12 },
+                              fontWeight: 700,
+                              bgcolor: "#2e7d32",
+                              boxShadow: "0 2px 8px rgba(46,125,50,0.25)",
+                              textTransform: "uppercase",
+                              letterSpacing: 0.5,
+                              "&:hover": {
+                                bgcolor: "#1b5e20",
+                                boxShadow: "0 4px 12px rgba(46,125,50,0.35)",
+                              },
+                            }}
+                          >
+                            Accept
+                          </Button>
+                        </Box>
+                      </Box>
+                    )}
                   </Box>
                 </Box>
               </Paper>

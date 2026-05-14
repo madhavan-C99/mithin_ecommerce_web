@@ -1674,7 +1674,69 @@ const OrderAcceptDialog = ({
                         </TableCell>
                       </TableRow>
                     ))}
-
+                    {/* Total row */}
+                    <TableRow sx={{ bgcolor: "#f8fafc" }}>
+                      <TableCell
+                        colSpan={5}
+                        align="right"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize:   { xs: 12, sm: 13 },
+                          pt:         1.5,
+                          border:     "none",
+                          borderTop:  "1px solid rgba(0,0,0,0.08)",
+                        }}
+                      >
+                       Sub Total Amount
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 800,
+                          fontSize:   { xs: 13, sm: 15 },
+                          color:      "#2e7d32",
+                          pt:         1.5,
+                          border:     "none",
+                          borderTop:  "1px solid rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        ₹&nbsp;
+                        {orderData.product?.reduce(
+                          (sum, p) => sum + (p.total_price || 0),
+                          0
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    {/* Total row */}
+                    <TableRow sx={{ bgcolor: "#f8fafc" }}>
+                      <TableCell
+                        colSpan={5}
+                        align="right"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize:   { xs: 12, sm: 13 },
+                          pt:         1.5,
+                          border:     "none",
+                          borderTop:  "1px solid rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        Delivery Charge
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: 800,
+                          fontSize:   { xs: 13, sm: 15 },
+                          color:      "#2e7d32",
+                          pt:         1.5,
+                          border:     "none",
+                          borderTop:  "1px solid rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        ₹&nbsp;{orderData.product?.reduce(
+                          (sum, p) => (p.delivery_charge || 0),
+                          0
+                        )}
+                      </TableCell>
+                    </TableRow>
                     {/* Total row */}
                     <TableRow sx={{ bgcolor: "#f8fafc" }}>
                       <TableCell
@@ -1700,9 +1762,8 @@ const OrderAcceptDialog = ({
                           borderTop:  "1px solid rgba(0,0,0,0.08)",
                         }}
                       >
-                        ₹&nbsp;
-                        {orderData.product?.reduce(
-                          (sum, p) => sum + (p.total_price || 0),
+                        ₹&nbsp;{orderData.product?.reduce(
+                          (sum, p) => (p.total_amount || 0),
                           0
                         )}
                       </TableCell>
@@ -1742,7 +1803,7 @@ const OrderAcceptDialog = ({
                     .filter((db) => db.is_active)
                     .map((db) => (
                       // <MenuItem key={db.id} value={db.id}>
-                      <MenuItem key={db.id} value={db.id} disabled={db.status !== "online"}>
+                      <MenuItem key={db.id} value={db.id} disabled={!db.is_available || db.status === "busy"} >
                         <Box
                           display="flex"
                           alignItems="center"
@@ -1757,9 +1818,11 @@ const OrderAcceptDialog = ({
                             <Typography fontSize={{ xs: 10, sm: 11 }} color="text.secondary">
                               {db.mobile_number}
                             </Typography>
-                          </Box>
-                          <Chip
-                            label={db.is_available ? "Available" : "Busy"}
+                           </Box>
+                         {/* <Chip
+                                    // "true"         "online"  or  "busy"
+                                    // "false"                                "offline"
+                            label={db.is_available ?"Available" : "Busy" ? "unAvailable"}
                             size="small"
                             sx={{
                               bgcolor:    db.is_available ? "#dcfce7" : "#fff9e6",
@@ -1768,7 +1831,32 @@ const OrderAcceptDialog = ({
                               fontWeight: 700,
                               height:     20,
                             }}
-                          />
+                          /> */}
+<Chip
+  label={
+    db.is_available
+      ? db.status === "busy"
+        ? "Busy"
+        : "Available"
+      : "Unavailable"
+  }
+  size="small"
+  sx={{
+    bgcolor: db.is_available
+      ? db.status === "busy"
+        ? "#fff9e6"
+        : "#dcfce7"
+      : "#fee2e2",
+    color: db.is_available
+      ? db.status === "busy"
+        ? "#92400e"
+        : "#16a34a"
+      : "#dc2626",
+    fontSize:   9,
+    fontWeight: 700,
+    height:     20,
+  }}
+/>
                         </Box>
                       </MenuItem>
                     ))}

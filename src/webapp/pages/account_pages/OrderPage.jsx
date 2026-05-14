@@ -616,6 +616,7 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { useEffect, useState } from "react";
 import { fetchPurchaseHistory } from "../../api/AllApi";
@@ -746,7 +747,7 @@ const OrderModal = ({ order, open, onClose }) => {
                 label={order.status}
                 color={statusColor(order.status)}
                 size="small"
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 600 , textTransform: "capitalize"}}
               />
               <IconButton size="small" onClick={onClose}>
                 <CloseIcon fontSize="small" />
@@ -756,6 +757,32 @@ const OrderModal = ({ order, open, onClose }) => {
 
           {/* ── MODAL BODY ── */}
           <Box sx={{ px: { xs: 2, sm: 3 }, py: 2.5 }}>
+              {/* ✅ Failure reason banner — only if failed */}
+                {order.failure_reason && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 1.2,
+                      backgroundColor: "#FCEBEB",
+                      border: "0.5px solid #F09595",
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1.5,
+                      mb: 3,
+                    }}
+                  >
+                    <ErrorOutlineIcon sx={{ color: "#A32D2D", fontSize: 20, flexShrink: 0, mt: 0.2 }} />
+                    <Box>
+                      <Typography sx={{ fontSize: "0.78rem", fontWeight: 700, color: "#A32D2D", mb: 0.3 }}>
+                        
+                      </Typography>
+                      <Typography sx={{ fontSize: "0.82rem", color: "#791F1F", lineHeight: 1.4 , textTransform: "capitalize"}}>
+                        {order.failure_reason}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
 
             {/* Summary pills */}
             <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mb: 3 }}>
@@ -940,210 +967,6 @@ const OrderModal = ({ order, open, onClose }) => {
   );
 };
 
-// /* ═══════════════════════════════════════════════════════════════════ */
-// /*  MAIN PAGE                                                           */
-// /* ═══════════════════════════════════════════════════════════════════ */
-// const OrdersPage = () => {
-//   const [orders, setOrders]       = useState([]);
-//   const [loading, setLoading]     = useState(true);
-//   const [selected, setSelected]   = useState(null);
-//   const [modalOpen, setModalOpen] = useState(false);
-
-//   const loadOrders = async () => {
-//     try {
-//       const user   = JSON.parse(localStorage.getItem("user"));
-//       const userId = user?.user_id;
-//       if (!userId) return;
-
-//       const data = await fetchPurchaseHistory(userId);
-//       setOrders(data);
-//     } catch (error) {
-//       console.error("Orders fetch failed", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     loadOrders();
-//     const interval = setInterval(loadOrders, 15000);
-//     return () => clearInterval(interval);
-//   }, []);
-
-//   const openModal  = (order) => { setSelected(order); setModalOpen(true); };
-//   const closeModal = ()      => { setModalOpen(false); };
-
-//   /* ── loading ── */
-//   if (loading) {
-//     return (
-//       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300, gap: 2 }}>
-//         <CircularProgress />
-//         <Typography variant="body2" color="text.secondary">Loading your orders…</Typography>
-//       </Box>
-//     );
-//   }
-
-//   /* ── empty state ── */
-//   if (orders.length === 0) {
-//     return (
-//       <Box sx={{ textAlign: "center", py: 10, color: "text.secondary" }}>
-//         <ShoppingBagIcon sx={{ fontSize: 64, opacity: 0.25, mb: 2 }} />
-//         <Typography variant="h6">No orders yet</Typography>
-//         <Typography variant="body2">Start shopping to see your orders here.</Typography>
-//       </Box>
-//     );
-//   }
-
-//   /* ── order list ── */
-//   return (
-//     <>
-//       <Container
-//         maxWidth="xl"
-//         sx={{ px: { xs: 1.5, sm: 2, md: 3 }, py: { xs: 2, sm: 3, md: 4 } }}
-//       >
-//         {/* Header row */}
-//         <Box
-//           sx={{
-//             display: "flex",
-//             alignItems: "center",
-//             justifyContent: "space-between",
-//             mb: { xs: 2, sm: 3 },
-//           }}
-//         >
-//           <Typography
-//             variant="h5"
-//             fontWeight={700}
-//             sx={{ fontSize: { xs: "1.1rem", sm: "1.3rem", md: "1.5rem" } }}
-//           >
-//             Your Orders
-//           </Typography>
-//           <Typography variant="body2" color="text.secondary">
-//             {orders.length} order{orders.length !== 1 ? "s" : ""}
-//           </Typography>
-//         </Box>
-
-//         {/* ── 2-column grid on lg+, single column below ── */}
-//         <Box
-//           sx={{
-//             display: "grid",
-//             gridTemplateColumns: {
-//               xs: "1fr",          // mobile:  1 card full width
-//               lg: "1fr 1fr",      // desktop: 2 cards side by side
-//             },
-//             gap: { xs: 1.5, sm: 2, md: 2.5 },
-//           }}
-//         >
-//           {orders.map((order) => (
-//             <Card
-//               key={order.order_id}
-//               onClick={() => openModal(order)}
-//               elevation={0}
-//               sx={{
-//                 borderRadius: { xs: 2.5, sm: 3 },
-//                 cursor: "pointer",
-//                 border: "1px solid",
-//                 borderColor: "grey.200",
-//                 transition: "all 0.22s ease",
-//                 "&:hover": {
-//                   transform: "translateY(-2px)",
-//                   boxShadow: "0 6px 24px rgba(0,0,0,0.10)",
-//                   borderColor: "primary.main",
-//                 },
-//                 "&:active": { transform: "translateY(0px)" },
-//               }}
-//             >
-//               <CardContent
-//                 sx={{
-//                   px: { xs: 2, sm: 2.5 },
-//                   py: { xs: 1.8, sm: 2 },
-//                   "&:last-child": { pb: { xs: 1.8, sm: 2 } },
-//                 }}
-//               >
-//                 {/* Row 1 — order number + date */}
-//                 <Box sx={{ mb: 1.2 }}>
-//                   <Typography
-//                     fontWeight={700}
-//                     sx={{ fontSize: { xs: "0.92rem", sm: "1rem" } }}
-//                   >
-//                     {order.order_number}
-//                   </Typography>
-//                   <Typography variant="caption" color="text.secondary">
-//                     {new Date(order.order_date).toLocaleString("en-IN", {
-//                       day: "numeric",
-//                       month: "short",
-//                       year: "numeric",
-//                       hour: "2-digit",
-//                       minute: "2-digit",
-//                     })}
-//                   </Typography>
-//                 </Box>
-
-//                 {/* Row 2 — items · status · price · cta — always ONE row, no wrap */}
-//                 <Box
-//                   sx={{
-//                     display: "flex",
-//                     alignItems: "center",
-//                     gap: { xs: 1, sm: 1.5 },
-//                     flexWrap: "nowrap",      // ← key: never wraps
-//                     overflow: "hidden",
-//                   }}
-//                 >
-//                   <Typography
-//                     variant="caption"
-//                     color="text.secondary"
-//                     sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
-//                   >
-//                     {order.item_counts} item{order.item_counts !== 1 ? "s" : ""}
-//                   </Typography>
-
-//                   <Chip
-//                     label={order.status}
-//                     color={statusColor(order.status)}
-//                     size="small"
-//                     sx={{
-//                       fontWeight: 600,
-//                       fontSize: { xs: "0.68rem", sm: "0.72rem" },
-//                       height: { xs: 22, sm: 24 },
-//                       flexShrink: 0,
-//                     }}
-//                   />
-
-//                   <Typography
-//                     fontWeight={700}
-//                     sx={{
-//                       whiteSpace: "nowrap",
-//                       flexShrink: 0,
-//                       fontSize: { xs: "0.88rem", sm: "1rem" },
-//                       ml: "auto",            // pushes price + cta to the right
-//                     }}
-//                   >
-//                     ₹{order.grand_total}
-//                   </Typography>
-
-//                   <Typography
-//                     variant="body2"
-//                     color="primary.main"
-//                     fontWeight={600}
-//                     sx={{
-//                       whiteSpace: "nowrap",
-//                       flexShrink: 0,
-//                       fontSize: { xs: "0.78rem", sm: "0.875rem" },
-//                     }}
-//                   >
-//                     View details →
-//                   </Typography>
-//                 </Box>
-//               </CardContent>
-//             </Card>
-//           ))}
-//         </Box>
-//       </Container>
-
-//       <OrderModal order={selected} open={modalOpen} onClose={closeModal} />
-//     </>
-//   );
-// };
-
 
 /* ═══════════════════════════════════════════════════════════════════ */
 /*  MAIN PAGE                                                           */
@@ -1304,7 +1127,7 @@ const OrdersPage = () => {
                     }}
                   >
                     {/* Row 1 — order number + date */}
-                    <Box sx={{ mb: 1.2 }}>
+                    {/* <Box sx={{ mb: 1.2 }}>
                       <Typography
                         fontWeight={700}
                         sx={{ fontSize: { xs: "0.92rem", sm: "1rem" } }}
@@ -1320,6 +1143,55 @@ const OrdersPage = () => {
                           minute: "2-digit",
                         })}
                       </Typography>
+                      <Typography>
+                        {order.failure_reason}
+                      </Typography>
+                    </Box> */}
+                    {/* Row 1 — order number + date + failure reason */}
+                    <Box sx={{ 
+                      display: "flex", 
+                      alignItems: "flex-start", 
+                      justifyContent: "space-between", 
+                      mb: 1.2 
+                    }}>
+                      {/* Left: order number + date */}
+                      <Box>
+                        <Typography fontWeight={700} sx={{ fontSize: { xs: "0.92rem", sm: "1rem" } }}>
+                          {order.order_number}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(order.order_date).toLocaleString("en-IN", {
+                            day: "numeric", month: "short", year: "numeric",
+                            hour: "2-digit", minute: "2-digit",
+                          })}
+                        </Typography>
+                      </Box>
+
+                      {/* Right: failure reason badge — only if failed */}
+                      {order.failure_reason && (
+                        <Box sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.6,
+                          backgroundColor: "#FCEBEB",
+                          border: "0.5px solid #F09595",
+                          borderRadius: 1.5,
+                          px: 1.2,
+                          py: 0.5,
+                          maxWidth: 220,
+                        }}>
+                          <ErrorOutlineIcon sx={{ fontSize: 15, color: "#A32D2D", flexShrink: 0 }} />
+                          <Typography sx={{
+                            fontSize: "0.72rem",
+                            color: "#791F1F",
+                            lineHeight: 1.3,
+                            fontWeight: 500,
+                            textTransform: "capitalize"
+                          }}>
+                            {order.failure_reason}
+                          </Typography>
+                        </Box>
+                      )}
                     </Box>
 
                     {/* Row 2 — items · status · price · cta */}
@@ -1349,6 +1221,7 @@ const OrdersPage = () => {
                           fontSize: { xs: "0.68rem", sm: "0.72rem" },
                           height: { xs: 22, sm: 24 },
                           flexShrink: 0,
+                          textTransform: "capitalize"
                         }}
                       />
 

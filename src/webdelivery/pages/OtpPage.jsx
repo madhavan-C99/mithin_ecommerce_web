@@ -936,8 +936,10 @@ import useDeliveryAuth from "../hooks/useDeliveryAuth";
  * 4. On success → show success state on same page
  * 5. On failure → show error, allow retry
  */
+const deliveryPath = import.meta.env.VITE_DELIVERY_PATH;
 
 const verifyDeliveryOtp = async (order_id, otp, delivery_boy_id) => {
+  console.log('checking')
   return await deliveryAxios.post("/adm/verify_otp_for_deliver_order", {
     order_id,
     otp,
@@ -1093,6 +1095,7 @@ const handleVerify = async () => {
   try {
     const response = await verifyDeliveryOtp(order_id, String(otp), deliveryBoy?.user_id);
 
+    console.log('response',response)
     // Axios interceptor already unwraps response.data.data
     // so response is now the plain string directly
     const message = typeof response === "string" ? response : "";
@@ -1204,7 +1207,7 @@ const handleVerify = async () => {
           </Box>
 
           <Button
-            onClick={() => navigate("/delivery/dashboard")}
+            onClick={() => navigate(`/${deliveryPath}/dashboard`)}
             fullWidth
             variant="contained"
             endIcon={<ArrowForwardRoundedIcon />}
@@ -1503,7 +1506,7 @@ const handleVerify = async () => {
 
         {/* Back button */}
         <Button
-          onClick={() => navigate("/delivery/orders")}
+          onClick={() => navigate(`/${deliveryPath}/orders`)}
           fullWidth
           variant="outlined"
           startIcon={

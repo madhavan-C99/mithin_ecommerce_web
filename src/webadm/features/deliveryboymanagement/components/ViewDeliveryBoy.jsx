@@ -157,6 +157,7 @@ export default function ViewDeliveryBoy({ open, onClose, deliveryBoyId }) {
     setData(null);
     try {
       const res = await deliveryBoyAPI.fetchOneDeliveryBoy({ id: deliveryBoyId });
+      console.log(res)
       setData(res?.data?.data || null);
     } catch (err) {
       console.error("View Delivery Boy Error:", err);
@@ -171,10 +172,11 @@ export default function ViewDeliveryBoy({ open, onClose, deliveryBoyId }) {
     setError("");
     onClose();
   };
-
-  const boy   = data?.delivery_boy_details?.[0] || null;
+  console.log("data",data)
+  const boy   = data?.delivery_boy_details || null;
+  console.log("boy",boy)
   const tiles = data?.tile_details || {};
-
+  console.log("tiles",tiles)
   return (
     <Dialog
       open={open}

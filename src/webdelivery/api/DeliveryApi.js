@@ -22,10 +22,23 @@ export const fetchDeliveryBoyDetails = async (id) => {
  * @param {number} id — deliveryBoy.user_id from DeliveryAuthContext
  * @returns {{ data: { status: "Success", current_status: "Online"|"Offline", is_available: boolean } }}
  */
-export const changeDeliveryBoyStatus = async (id) => {
-  return await deliveryAxios.post("/adm/change_deliveryboy_status", { id });
-};
+// export const changeDeliveryBoyStatus = async (id) => {
+//   return await deliveryAxios.post("/adm/change_deliveryboy_status", { id ,status});
+// };
+export const changeDeliveryBoyStatus = async (
+  id,payload
+) => {
 
+
+  console.log("STATUS PAYLOAD:", payload);
+
+  const res = await deliveryAxios.post(
+    "/adm/change_deliveryboy_status",
+    {id,...payload}
+  );
+  console.log("statusres",res)
+  return res || res.data
+};
 /**
  * Fetch delivery boy order history
  * @param {number} id — deliveryBoy.user_id from DeliveryAuthContext

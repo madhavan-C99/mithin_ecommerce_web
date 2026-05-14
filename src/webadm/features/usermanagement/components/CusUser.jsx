@@ -734,7 +734,7 @@ const CusUser = () => {
 
   useEffect(() => {
     fetchAllUserDetails();
-  }, []);
+  }, [setAllUsers]);
 
   // ── Search debounce (untouched) ─────────────────────────────────────────
   useEffect(() => {

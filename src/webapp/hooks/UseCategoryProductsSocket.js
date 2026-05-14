@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 // import axiosInstance from "../api/Axios";
 
-const useCategoryProductsSocket = (categoryId) => {
+const useCategoryProductsSocket = (categoryId, subcategoryId = null,productId = null) => {
   const [products, setProducts] = useState(null);
   const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
   // const [imageMap, setImageMap] = useState({});
@@ -10,6 +10,9 @@ const useCategoryProductsSocket = (categoryId) => {
 
   useEffect(() => {
     if (!categoryId) return;
+    setIsInitialLoadDone(false); 
+    setProducts([]);             
+    setError(null);
 
     const socket = new WebSocket(
       `${import.meta.env.VITE_WS_BASE_URL}/ws/products/`
@@ -17,9 +20,18 @@ const useCategoryProductsSocket = (categoryId) => {
 
     socketRef.current = socket;
 
-    socket.onopen = () => {
-      socket.send(JSON.stringify({ category_id: categoryId }));
-    };
+    // socket.onopen = () => {
+    //   socket.send(JSON.stringify({ category_id: categoryId }));
+    // };
+
+socket.onopen = () => {
+  const payload = productId
+    ? { product_id: String(productId) }
+    : subcategoryId
+    ? { sub_category_id: String(subcategoryId) }
+    : { category_id: String(categoryId) };
+  socket.send(JSON.stringify(payload));
+};
 
     // socket.onmessage = (event) => {
     //   try {
@@ -124,7 +136,7 @@ const useCategoryProductsSocket = (categoryId) => {
     };
 
     return () => socket.close();
-  }, [categoryId]);
+  }, [categoryId,subcategoryId,productId]);
 
   // Load images when products change
   // useEffect(() => {

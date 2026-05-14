@@ -1776,7 +1776,7 @@ const AllProduct = () => {
             "&::-webkit-scrollbar-thumb": { backgroundColor: "#c5c5c5", borderRadius: "10px" },
           }}
         >
-          <Table stickyHeader sx={{ minWidth: 680 }}>
+          <Table stickyHeader sx={{ minWidth: 680 ,tableLayout: "fixed"}}>
             <TableHead>
               <TableRow>
                 <TableCell
@@ -1787,6 +1787,7 @@ const AllProduct = () => {
                     zIndex: 11,
                     minWidth: 46,
                     borderRight: "1px solid #f0f0f0",
+                    
                   }}
                 >
                   S.No
@@ -1799,7 +1800,6 @@ const AllProduct = () => {
                 <TableCell sx={{ ...tablehead, minWidth: 60 }}>Qty</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 82 }}>Status</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 100 }}>Trend</TableCell>
-                <TableCell sx={{ ...tablehead, minWidth: 90 }}>Expiry</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 80 }} align="center">
                   Actions
                 </TableCell>
@@ -1890,7 +1890,6 @@ const AllProduct = () => {
                         />
                       </TableCell>
 
-                      <TableCell sx={tabledata}>{product.expiry_date}</TableCell>
 
                       <TableCell
                         align="center"

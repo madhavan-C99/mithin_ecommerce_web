@@ -789,7 +789,7 @@ export default function DeliveryBoyPage() {
   const handleDeleteConfirm = async () => {
     setDeleteLoading(true);
     try {
-      await deliveryBoyAPI.deleteDeliveryBoy({ id: deleteTarget.id });
+      await deliveryBoyAPI.deleteDeliveryBoy({ id: deleteTarget.user_id });
       showSnack(`"${deleteTarget.name}" removed successfully.`);
       fetchDeliveryBoys();
     } catch (err) {
@@ -812,7 +812,7 @@ export default function DeliveryBoyPage() {
 
   const openEdit   = (boy) => { setEditTarget(boy);      setEditOpen(true);  };
   const openDelete = (boy) => { setDeleteTarget(boy);    setDeleteOpen(true); };
-  const openView   = (boy) => { setViewTargetId(boy.id); setViewOpen(true);  };
+  const openView   = (boy) => { setViewTargetId(boy.user_id); setViewOpen(true);  };
 
   return (
     <Box sx={{ minWidth: 0 }}>

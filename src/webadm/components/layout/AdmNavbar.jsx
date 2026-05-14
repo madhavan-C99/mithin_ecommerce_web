@@ -496,8 +496,9 @@ export default function PrimarySearchAppBar({ productname }) {
     setNotificationAnchor(null);
   };
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const firstLetter = user?.name?.charAt(0).toUpperCase();
+  const user = JSON.parse(localStorage.getItem("adm_user"));
+  console.log("user",user)
+  const firstLetter = user?.charAt(0).toUpperCase();
 
   useEffect(() => {
     const stockSocket = createSocket(
@@ -626,6 +627,17 @@ export default function PrimarySearchAppBar({ productname }) {
 
           {/* NEW ORDER */}
           {n.title === "New Order" && (
+            <Box mt={1}>
+              <Typography fontWeight="bold">{n.title}</Typography>
+              <Typography fontSize={14} color="text.secondary" mt={0.5}>
+                {n.message}
+              </Typography>
+              <Typography fontSize={12} color="text.disabled" mt={1}>
+                {n.time_ago}
+              </Typography>
+            </Box>
+          )}
+          {n.title === "Reassign Order" && (
             <Box mt={1}>
               <Typography fontWeight="bold">{n.title}</Typography>
               <Typography fontSize={14} color="text.secondary" mt={0.5}>

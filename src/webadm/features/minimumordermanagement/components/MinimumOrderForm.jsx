@@ -571,58 +571,7 @@ const loadSavedState = () => {
   }
 };
 
-// ── Stat card — small summary tiles ───────────────────────
-// const StatCard = ({ icon, label, value, color, bg }) => (
-//   <Box
-//     sx={{
-//       flex           : 1,
-//       minWidth       : 0,
-//       backgroundColor: bg,
-//       border         : `1px solid ${color}30`,
-//       borderRadius   : "12px",
-//       px             : { xs: 1.5, sm: 2 },
-//       py             : { xs: 1.5, sm: 2 },
-//       display        : "flex",
-//       alignItems     : "center",
-//       gap            : { xs: 1, sm: 1.5 },
-//     }}
-//   >
-//     <Box
-//       sx={{
-//         width          : { xs: 34, sm: 40 },
-//         height         : { xs: 34, sm: 40 },
-//         borderRadius   : "10px",
-//         backgroundColor: `${color}18`,
-//         display        : "flex",
-//         alignItems     : "center",
-//         justifyContent : "center",
-//         flexShrink     : 0,
-//       }}
-//     >
-//       {React.cloneElement(icon, {
-//         sx: { fontSize: { xs: 18, sm: 20 }, color },
-//       })}
-//     </Box>
-//     <Box sx={{ minWidth: 0 }}>
-//       <Typography
-//         fontSize={{ xs: "0.68rem", sm: "0.72rem" }}
-//         color="text.secondary"
-//         fontWeight={500}
-//         noWrap
-//       >
-//         {label}
-//       </Typography>
-//       <Typography
-//         fontSize={{ xs: "1rem", sm: "1.15rem" }}
-//         fontWeight={800}
-//         color={color}
-//         lineHeight={1.2}
-//       >
-//         {value}
-//       </Typography>
-//     </Box>
-//   </Box>
-// );
+
 
 
 
@@ -686,6 +635,7 @@ const StatCard = ({ icon, label, value, color, bg }) => (
 
 
 
+
 const MinimumOrderForm = () => {
 
   const { mode: savedMode, savedValues } = loadSavedState();
@@ -705,17 +655,46 @@ const MinimumOrderForm = () => {
 
   const isReadOnly = mode === "update" && !isEditing;
 
+const getOrderFeeapi = async () => {
+  try {
+    const result = await minimumOrderAPI.fetchOrderFee();
+    console.log("✅ fetchOrderFee response:", result);
+
+    const fee = result?.data?.data?.[0]; // ✅ array-ல் முதல் item
+    console.log("✅ fee:", fee);
+
+    if (fee) {
+      setMinOrderAmount(fee.min_order_amount ?? "");
+      setDeliveryFee(fee.delivery_charge ?? "");  // ✅ delivery_charge (fee இல்ல)
+      setMode("update");
+
+      localStorage.setItem(LS_MODE_KEY, "update");
+      localStorage.setItem(LS_VALUES_KEY, JSON.stringify({
+        min_order_amount: fee.min_order_amount,
+        delivery_fee    : fee.delivery_charge,   // ✅
+      }));
+    }
+  } catch (error) {
+    console.log("Invalid Error", error);
+  }
+};
+  
+    useEffect(() => {
+      getOrderFeeapi();
+    }, []);
+
+
   // ── validation — unchanged ─────────────────────────────────
   const validate = () => {
     if (!minOrderAmount || !deliveryFee) {
       setErrorMsg("Both fields are required.");
       return false;
     }
-    if (Number(minOrderAmount) <= 0) {
+    if (Number(minOrderAmount) < 0) {
       setErrorMsg("Minimum order amount must be greater than 0.");
       return false;
     }
-    if (Number(deliveryFee) <= 0) {
+    if (Number(deliveryFee) < 0) {
       setErrorMsg("Delivery fee must be greater than 0.");
       return false;
     }

@@ -182,8 +182,11 @@ const useDeliverySocket = () => {
       try {
         const data = JSON.parse(event.data);
         if (data.action === "ORDER_CONFIRMED") {
+
           setActiveOrder(data);
         }
+        
+
       } catch (err) {
         console.error("useDeliverySocket: failed to parse message", err);
       }

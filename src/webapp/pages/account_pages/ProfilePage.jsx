@@ -24,99 +24,31 @@ import {
 import AddressDialog from "../../components/profile/AddressDialog";
 import EditProfileDialog from "../../components/profile/EditProfileDialog";
 import { useAuth } from "../../context/AuthContext";
-
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
 
-   const { user, authLoading } = useAuth();
+  const { user, authLoading } = useAuth();
+  const navigate = useNavigate(); // ✅ இங்கே initialize பண்ணினேன்
 
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const [addressOpen, setAddressOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-
-  const [addresses, setAddresses] = useState([]);
-
+  const [profile, setProfile]               = useState(null);
+  const [loading, setLoading]               = useState(true);
+  const [error, setError]                   = useState(false);
+  const [addressOpen, setAddressOpen]       = useState(false);
+  const [editOpen, setEditOpen]             = useState(false);
+  const [addresses, setAddresses]           = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
 
-  // const fetchProfile = async () => {
-
-  //   try {
-
-  //     setLoading(true);
-  //     setError(false);
-
-  //     const storedUser = localStorage.getItem("user");
-  //     const parsedUser = JSON.parse(storedUser);
-  //     const userId = parsedUser.user_id;
-
-  //     const profileResponse = await getCustomerProfile(userId);
-  //     setProfile(profileResponse);
-
-  //     const addressResponse = await fetchAllAddresses(userId);
-  //     setAddresses(addressResponse);
-
-  //   } catch (err) {
-
-  //     console.error(err);
-  //     setError(true);
-
-  //   } finally {
-
-  //     setLoading(false);
-
-  //   }
-  // };
-
-
-//   const fetchProfile = async () => {
-//   try {
-//     setLoading(true);
-//     setError(false);
-
-//     const storedUser = localStorage.getItem("user");
-
-//     // ✅ Guard: if no user in storage, don't call API
-//     if (!storedUser || storedUser === "undefined") {
-//       setError(true);
-//       return;
-//     }
-
-//     const parsedUser = JSON.parse(storedUser);
-//     const userId = parsedUser?.user_id;
-
-//     // ✅ Guard: if no user_id, don't call API
-//     if (!userId) {
-//       setError(true);
-//       return;
-//     }
-
-//     const profileResponse = await getCustomerProfile(userId);
-//     setProfile(profileResponse);
-
-//     const addressResponse = await fetchAllAddresses(userId);
-//     setAddresses(addressResponse);
-
-//   } catch (err) {
-//     console.error(err);
-//     setError(true);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-
-const fetchProfile = async () => {
+  const fetchProfile = async () => {
     try {
       setLoading(true);
       setError(false);
 
-      const userId = user?.user_id; // ✅ clean, no localStorage parsing
+      const userId = user?.user_id;
 
       if (!userId) {
         setError(true);
+        navigate("/login", { replace: true }); // ✅ login page
         return;
       }
 
@@ -129,56 +61,39 @@ const fetchProfile = async () => {
     } catch (err) {
       console.error(err);
       setError(true);
+      // ✅ token expire / API fail → login page
+      navigate("/login", { replace: true });
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Wait for auth to finish before fetching
+  // ✅ auth finish ஆனா மட்டும் fetch பண்ணு
   useEffect(() => {
     if (!authLoading) {
       fetchProfile();
     }
   }, [authLoading]);
 
-
-
-
-
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
   const handleProfileSave = async (formData) => {
-
     try {
-
-      const storedUser = localStorage.getItem("user");
-      const parsedUser = JSON.parse(storedUser);
-
       const payload = {
-        user_id: parsedUser.user_id,
-        name: formData.name,
-        email: formData.email,
-        mobile: profile.mobile
+        user_id: user?.user_id, // ✅ localStorage பதில் useAuth
+        name   : formData.name,
+        email  : formData.email,
+        mobile : profile.mobile
       };
 
       await updateCustomerProfile(payload);
-
       setEditOpen(false);
       fetchProfile();
 
     } catch (err) {
-
       console.error("Profile update failed", err);
-
     }
   };
 
-  const handleAddressAdded = () => {
-    fetchProfile();
-  };
+  const handleAddressAdded   = () => fetchProfile();
 
   const handleAddressUpdated = () => {
     setSelectedAddress(null);
@@ -186,20 +101,11 @@ const fetchProfile = async () => {
   };
 
   const handleDeleteAddress = async (addressId) => {
-
     try {
-
-      const storedUser = localStorage.getItem("user");
-      const parsedUser = JSON.parse(storedUser);
-
-      await deleteCustomerAddress(parsedUser.user_id, addressId);
-
+      await deleteCustomerAddress(user?.user_id, addressId); // ✅ useAuth
       fetchProfile();
-
     } catch (error) {
-
       console.error("Delete address failed:", error);
-
     }
   };
 
@@ -208,40 +114,42 @@ const fetchProfile = async () => {
     setAddressOpen(true);
   };
 
+  // ── Loading ──────────────────────────────────────────────
   if (loading) {
     return (
-      // <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-      //   <CircularProgress />
-      // </Box>
-
       <Box sx={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "70vh",
-        }}
-      >
-        <CircularProgress />
+        <Box
+          sx={{
+            display       : "flex",
+            justifyContent: "center",
+            alignItems    : "center",
+            height        : "70vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
       </Box>
-    </Box>
     );
   }
 
+  // ── Error ────────────────────────────────────────────────
   if (error) {
     return (
       <Box sx={{ textAlign: "center", mt: 6 }}>
         <Typography variant="h6">Failed to load profile</Typography>
-        <Button onClick={fetchProfile} sx={{ mt: 2 }}>
+        {/* ✅ Retry → login page, page refresh ஆகாது */}
+        <Button
+          onClick={() => navigate("/login", { replace: true })}
+          sx={{ mt: 2 }}
+        >
           Retry
         </Button>
       </Box>
     );
   }
 
+  // ── Main ─────────────────────────────────────────────────
   return (
-
     <Box>
 
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
@@ -249,28 +157,21 @@ const fetchProfile = async () => {
       </Typography>
 
       {/* PROFILE CARD */}
-
       <Card sx={{ mb: 3 }}>
-
         <CardContent>
 
           <Box
             sx={{
-              display: "flex",
+              display       : "flex",
               justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2
+              alignItems    : "center",
+              mb            : 2
             }}
           >
-
-            <Typography variant="h6">
-              Personal Information
-            </Typography>
-
+            <Typography variant="h6">Personal Information</Typography>
             <IconButton onClick={() => setEditOpen(true)}>
               <EditIcon />
             </IconButton>
-
           </Box>
 
           <Divider sx={{ mb: 2 }} />
@@ -278,20 +179,15 @@ const fetchProfile = async () => {
           <Typography sx={{ mb: 1 }}>
             <strong>Name:</strong> {profile?.name}
           </Typography>
-
           <Typography>
             <strong>Email:</strong> {profile?.email}
           </Typography>
 
         </CardContent>
-
       </Card>
 
-
       {/* ADDRESS SECTION */}
-
       <Card sx={{ mt: 3 }}>
-
         <CardContent>
 
           <Typography variant="h6" sx={{ mb: 2 }}>
@@ -318,33 +214,25 @@ const fetchProfile = async () => {
           )}
 
           {addresses.map((addr) => (
-
             <Card key={addr.id} sx={{ mb: 2, background: "#fafafa" }}>
-
               <CardContent>
 
                 <Box
                   sx={{
-                    display: "flex",
+                    display       : "flex",
                     justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 1
+                    alignItems    : "center",
+                    mb            : 1
                   }}
                 >
-
                   <Typography sx={{ fontWeight: 600 }}>
                     {addr.name} ({addr.category})
                   </Typography>
 
                   <Box>
-
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditAddress(addr)}
-                    >
+                    <IconButton size="small" onClick={() => handleEditAddress(addr)}>
                       <EditIcon />
                     </IconButton>
-
                     <IconButton
                       size="small"
                       color="error"
@@ -352,19 +240,17 @@ const fetchProfile = async () => {
                     >
                       <DeleteIcon />
                     </IconButton>
-
                   </Box>
-
                 </Box>
 
                 <Typography>{addr.address_line1}</Typography>
                 <Typography>{addr.address_line2}</Typography>
-                
+
                 {addr.landmark && (
                   <Typography sx={{ color: "text.secondary" }}>
                     Landmark: {addr.landmark}
-                    </Typography>
-                  )}
+                  </Typography>
+                )}
 
                 <Typography>
                   {addr.city}, {addr.state} - {addr.pincode}
@@ -375,15 +261,11 @@ const fetchProfile = async () => {
                 </Typography>
 
               </CardContent>
-
             </Card>
-
           ))}
 
         </CardContent>
-
       </Card>
-
 
       <AddressDialog
         open={addressOpen}
