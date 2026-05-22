@@ -273,12 +273,29 @@ export const AdminAuthProvider = ({ children }) => {
 };
 
 
+// import { createContext, useState, useEffect, useRef } from "react";
+
 // ─── Bell Sound ───────────────────────────────────────────────────────────────
+// ✅ ஒரே ஒரு context — file level-ல வை
+let sharedCtx = null;
+
+const getAudioContext = () => {
+  if (!sharedCtx || sharedCtx.state === "closed") {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return null;
+    sharedCtx = new AudioContext();
+  }
+  if (sharedCtx.state === "suspended") {
+    sharedCtx.resume();
+  }
+  return sharedCtx;
+};
+
 const playClassicBell = () => {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
     const playTone = (freq, startTime, duration, gainVal) => {
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
@@ -291,6 +308,7 @@ const playClassicBell = () => {
       oscillator.start(startTime);
       oscillator.stop(startTime + duration);
     };
+
     const now = ctx.currentTime;
     playTone(880, now, 1.2, 0.6);
     playTone(660, now + 0.35, 1.2, 0.5);
@@ -299,6 +317,27 @@ const playClassicBell = () => {
   }
 };
 
+// ─── Bell Loop Management ─────────────────────────────────────────────────────
+const activeBells = new Map(); // notification_id → intervalId
+
+const startBellLoop = (notificationId) => {
+  if (activeBells.has(notificationId)) return;
+  playClassicBell();
+  const intervalId = setInterval(playClassicBell, 1000);
+  activeBells.set(notificationId, intervalId);
+};
+
+export const stopBellForNotification = (notificationId) => {
+  if (activeBells.has(notificationId)) {
+    clearInterval(activeBells.get(notificationId));
+    activeBells.delete(notificationId);
+  }
+};
+
+export const stopAllBells = () => {
+  activeBells.forEach((id) => clearInterval(id));
+  activeBells.clear();
+};
 
 // ─── Browser Push Notification ────────────────────────────────────────────────
 const requestNotificationPermission = async () => {
@@ -307,16 +346,20 @@ const requestNotificationPermission = async () => {
   }
 };
 
-// ── FIXED: removed visibilityState check so it fires on ALL routes & tabs ──
-const showBrowserNotification = (title, body) => {
-  if ("Notification" in window && Notification.permission === "granted") {
-    new Notification(title, {
-      body,
-      icon: "/favicon.ico",
+export const showBrowserNotification = (title, body) => {
+  if (!("Notification" in window)) return;
+  
+  if (Notification.permission === "granted") {
+    new Notification(title, { body, icon: "/favicon.ico" });
+  } else if (Notification.permission === "default") {
+    // Permission இல்லன்னா request பண்ணிட்டு show பண்ணு
+    Notification.requestPermission().then((perm) => {
+      if (perm === "granted") {
+        new Notification(title, { body, icon: "/favicon.ico" });
+      }
     });
   }
 };
-
 
 // ─── Notification Context ─────────────────────────────────────────────────────
 export const NotificationContext = createContext();
@@ -324,13 +367,13 @@ export const NotificationContext = createContext();
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const prevNotificationIds = useRef(new Set());
+  // FIX: track whether this is the first WebSocket message
+  const isInitialLoad = useRef(true);
 
-  // ── Request permission once on app load ──
   useEffect(() => {
     requestNotificationPermission();
   }, []);
 
-  // ── Global WebSocket — lives as long as app is open ──
   useEffect(() => {
     const socket = new WebSocket(
       `${import.meta.env.VITE_WS_BASE_URL}/ws/notification_data/`
@@ -346,27 +389,34 @@ export const NotificationProvider = ({ children }) => {
         const parsedData = JSON.parse(event.data);
         const newData = parsedData.payload || [];
 
-        // ── Detect truly NEW notifications and trigger bell + push ──
-        newData.forEach((n) => {
-          if (!prevNotificationIds.current.has(n.notification_id)) {
+        if (isInitialLoad.current) {
+          // FIX: First message — just seed the known IDs, no bell/browser notification
+          newData.forEach((n) => {
             prevNotificationIds.current.add(n.notification_id);
+          });
+          isInitialLoad.current = false;
+        } else {
+          // Subsequent messages — detect truly NEW notifications
+          newData.forEach((n) => {
+            if (!prevNotificationIds.current.has(n.notification_id)) {
+              prevNotificationIds.current.add(n.notification_id);
 
-            // Bell sound — works on same tab, any route
-            playClassicBell();
+              // FIX: Start looping bell (stops when user views)
+              startBellLoop(n.notification_id);
 
-            // OS push notification — works on different tab too
-            const title =
-              n.title === "Low Stock" ? `⚠️ Low Stock Alert` : `🛒 New Order`;
-            const body =
-              n.title === "Low Stock"
-                ? `${n.name} is running low (${n.stock} left)`
-                : n.message || "A new order has arrived";
+              // Browser notification
+              const title =
+                n.title === "Low Stock" ? `⚠️ Low Stock Alert` : `🛒 New Order`;
+              const body =
+                n.title === "Low Stock"
+                  ? `${n.name} is running low (${n.stock} left)`
+                  : n.message || "A new order has arrived";
 
-            showBrowserNotification(title, body);
-          }
-        });
+              showBrowserNotification(title, body);
+            }
+          });
+        }
 
-        // ── Merge + deduplicate + sort notifications in state ──
         setNotifications((prev) => {
           const merged = [...newData, ...prev];
           const unique = merged.filter(
@@ -384,16 +434,12 @@ export const NotificationProvider = ({ children }) => {
       }
     };
 
-    socket.onerror = (err) => {
-      console.error("Notification socket error:", err);
-    };
-
-    socket.onclose = () => {
-      console.log("Notification socket closed");
-    };
+    socket.onerror = (err) => console.error("Notification socket error:", err);
+    socket.onclose = () => console.log("Notification socket closed");
 
     return () => {
       socket.close();
+      stopAllBells(); // cleanup on unmount
     };
   }, []);
 
@@ -405,4 +451,137 @@ export const NotificationProvider = ({ children }) => {
 };
 
 
+
 export const DashboardContext = createContext();
+
+
+// // ─── Bell Sound ───────────────────────────────────────────────────────────────
+// const playClassicBell = () => {
+//   try {
+//     const AudioContext = window.AudioContext || window.webkitAudioContext;
+//     if (!AudioContext) return;
+//     const ctx = new AudioContext();
+//     const playTone = (freq, startTime, duration, gainVal) => {
+//       const oscillator = ctx.createOscillator();
+//       const gainNode = ctx.createGain();
+//       oscillator.connect(gainNode);
+//       gainNode.connect(ctx.destination);
+//       oscillator.type = "sine";
+//       oscillator.frequency.setValueAtTime(freq, startTime);
+//       gainNode.gain.setValueAtTime(gainVal, startTime);
+//       gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+//       oscillator.start(startTime);
+//       oscillator.stop(startTime + duration);
+//     };
+//     const now = ctx.currentTime;
+//     playTone(880, now, 1.2, 0.6);
+//     playTone(660, now + 0.35, 1.2, 0.5);
+//   } catch (e) {
+//     console.warn("Bell sound error:", e);
+//   }
+// };
+
+
+// // ─── Browser Push Notification ────────────────────────────────────────────────
+// const requestNotificationPermission = async () => {
+//   if ("Notification" in window && Notification.permission === "default") {
+//     await Notification.requestPermission();
+//   }
+// };
+
+// // ── FIXED: removed visibilityState check so it fires on ALL routes & tabs ──
+// const showBrowserNotification = (title, body) => {
+//   if ("Notification" in window && Notification.permission === "granted") {
+//     new Notification(title, {
+//       body,
+//       icon: "/favicon.ico",
+//     });
+//   }
+// };
+
+
+// // ─── Notification Context ─────────────────────────────────────────────────────
+// export const NotificationContext = createContext();
+
+// export const NotificationProvider = ({ children }) => {
+//   const [notifications, setNotifications] = useState([]);
+//   const prevNotificationIds = useRef(new Set());
+
+//   // ── Request permission once on app load ──
+//   useEffect(() => {
+//     requestNotificationPermission();
+//   }, []);
+
+//   // ── Global WebSocket — lives as long as app is open ──
+//   useEffect(() => {
+//     const socket = new WebSocket(
+//       `${import.meta.env.VITE_WS_BASE_URL}/ws/notification_data/`
+//     );
+
+//     socket.onopen = () => {
+//       console.log("Global notification socket connected");
+//       socket.send(JSON.stringify({ action: "notification_all" }));
+//     };
+
+//     socket.onmessage = (event) => {
+//       try {
+//         const parsedData = JSON.parse(event.data);
+//         const newData = parsedData.payload || [];
+
+//         // ── Detect truly NEW notifications and trigger bell + push ──
+//         newData.forEach((n) => {
+//           if (!prevNotificationIds.current.has(n.notification_id)) {
+//             prevNotificationIds.current.add(n.notification_id);
+
+//             // Bell sound — works on same tab, any route
+//             playClassicBell();
+
+//             // OS push notification — works on different tab too
+//             const title =
+//               n.title === "Low Stock" ? `⚠️ Low Stock Alert` : `🛒 New Order`;
+//             const body =
+//               n.title === "Low Stock"
+//                 ? `${n.name} is running low (${n.stock} left)`
+//                 : n.message || "A new order has arrived";
+
+//             showBrowserNotification(title, body);
+//           }
+//         });
+
+//         // ── Merge + deduplicate + sort notifications in state ──
+//         setNotifications((prev) => {
+//           const merged = [...newData, ...prev];
+//           const unique = merged.filter(
+//             (item, index, self) =>
+//               index === self.findIndex(
+//                 (t) => t.notification_id === item.notification_id
+//               )
+//           );
+//           return unique.sort(
+//             (a, b) => new Date(b.created_at) - new Date(a.created_at)
+//           );
+//         });
+//       } catch (error) {
+//         console.error("Invalid JSON:", event.data);
+//       }
+//     };
+
+//     socket.onerror = (err) => {
+//       console.error("Notification socket error:", err);
+//     };
+
+//     socket.onclose = () => {
+//       console.log("Notification socket closed");
+//     };
+
+//     return () => {
+//       socket.close();
+//     };
+//   }, []);
+
+//   return (
+//     <NotificationContext.Provider value={{ notifications, setNotifications }}>
+//       {children}
+//     </NotificationContext.Provider>
+//   );
+// };

@@ -1184,7 +1184,7 @@ const ActiveOrderCard = ({ order, onAccept, onReportSuccess }) => {
     status,
     customer_name,
     delivery_address,
-    items = [],
+    items=[],
     total_amount,
   } = order;
 
@@ -1432,7 +1432,9 @@ const ActiveOrderCard = ({ order, onAccept, onReportSuccess }) => {
               }}
             >
               {items.map((item, i) => {
-                const subtotal = (item.quantity * parseFloat(item.price)).toFixed(2);
+                // const subtotal = (item.quantity * parseFloat(item.price)).toFixed(2);
+                const subtotal = ((item.quantity * item.weight )*parseFloat(item.price)).toFixed(2);
+
                 return (
                   <Box
                     key={i}

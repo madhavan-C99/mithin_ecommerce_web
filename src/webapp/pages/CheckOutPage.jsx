@@ -351,11 +351,12 @@ const CheckoutPage = () => {
           spacing={{ xs: 1.5, md: 2.5 }}
           alignItems="flex-start"
           justifyContent="center"
+          // bgcolor="#4fa425"
         >
           {/* LEFT COLUMN */}
           <Grid
             item
-            xs={12}
+            xs={10}
             md={7}
             sx={{
               animation: "ckFadeUp 0.4s ease 0.05s both",
@@ -363,7 +364,9 @@ const CheckoutPage = () => {
                 from: { opacity: 0, transform: "translateY(18px)" },
                 to: { opacity: 1, transform: "translateY(0)" },
               },
+              // bgcolor:"#a42525"
             }}
+
           >
             <AddressSection address={address} refresh={loadData} />
             <DeliverySlot />

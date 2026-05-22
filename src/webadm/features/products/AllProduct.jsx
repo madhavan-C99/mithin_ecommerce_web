@@ -1776,7 +1776,7 @@ const AllProduct = () => {
             "&::-webkit-scrollbar-thumb": { backgroundColor: "#c5c5c5", borderRadius: "10px" },
           }}
         >
-          <Table stickyHeader sx={{ minWidth: 680 ,tableLayout: "fixed"}}>
+          <Table stickyHeader sx={{ minWidth: 680 ,tableLayout: "auto"}}>
             <TableHead>
               <TableRow>
                 <TableCell
@@ -1785,22 +1785,34 @@ const AllProduct = () => {
                     position: "sticky",
                     left: 0,
                     zIndex: 11,
-                    minWidth: 46,
+                    // minWidth: 36,
                     borderRight: "1px solid #f0f0f0",
                     
                   }}
                 >
                   S.No
-                </TableCell>
+                {/* </TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 58 }}>Image</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 140 }}>Product</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 110 }}>SubCategory</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 80 }}>Price(₹)</TableCell>
-                <TableCell sx={{ ...tablehead, minWidth: 80 }}>Weight</TableCell>
-                <TableCell sx={{ ...tablehead, minWidth: 60 }}>Qty</TableCell>
+                <TableCell sx={{ ...tablehead, minWidth: 60 }}>Weight</TableCell>
+                <TableCell sx={{ ...tablehead, minWidth: 40 }}>Qty</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 82 }}>Status</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 100 }}>Trend</TableCell>
                 <TableCell sx={{ ...tablehead, minWidth: 80 }} align="center">
+                  Actions
+                </TableCell> */}
+                </TableCell>
+                <TableCell sx={{ ...tablehead, }}>Image</TableCell>
+                <TableCell sx={{ ...tablehead, }}>Product</TableCell>
+                <TableCell sx={{ ...tablehead,  }}>SubCategory</TableCell>
+                <TableCell sx={{ ...tablehead, }}>Price(₹)</TableCell>
+                <TableCell sx={{ ...tablehead, }}>Weight</TableCell>
+                <TableCell sx={{ ...tablehead, }}>Qty</TableCell>
+                <TableCell sx={{ ...tablehead, }}>Status</TableCell>
+                <TableCell sx={{ ...tablehead, }}>Trend</TableCell>
+                <TableCell sx={{ ...tablehead, }} align="center">
                   Actions
                 </TableCell>
               </TableRow>

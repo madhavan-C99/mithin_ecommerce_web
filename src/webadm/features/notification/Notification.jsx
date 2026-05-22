@@ -22,6 +22,7 @@ import { orderAPI } from "../ordermanagement/components/orderAPI";
 import { useEffect, useState, useRef } from "react";
 import { useContext } from "react";
 import { NotificationContext } from "../../context/AuthContext";
+import { stopBellForNotification } from "../../context/AuthContext";  //bell sound stop 
 
 // ── NEW IMPORT ────────────────────────────────────────────────────────────────
 import OrderAcceptDialog from "./OrderAcceptDialog";
@@ -29,57 +30,57 @@ import OrderAcceptDialog from "./OrderAcceptDialog";
 
 
 // ─── Classic Bell Sound via Web Audio API ────────────────────────────────────
-const playClassicBell = () => {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
+// const playClassicBell = () => {
+//   try {
+//     const AudioContext = window.AudioContext || window.webkitAudioContext;
+//     if (!AudioContext) return;
 
-    const ctx = new AudioContext();
+//     const ctx = new AudioContext();
 
-    const playTone = (freq, startTime, duration, gainVal) => {
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
+//     const playTone = (freq, startTime, duration, gainVal) => {
+//       const oscillator = ctx.createOscillator();
+//       const gainNode = ctx.createGain();
 
-      oscillator.connect(gainNode);
-      gainNode.connect(ctx.destination);
+//       oscillator.connect(gainNode);
+//       gainNode.connect(ctx.destination);
 
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(freq, startTime);
+//       oscillator.type = "sine";
+//       oscillator.frequency.setValueAtTime(freq, startTime);
 
-      gainNode.gain.setValueAtTime(gainVal, startTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+//       gainNode.gain.setValueAtTime(gainVal, startTime);
+//       gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
-      oscillator.start(startTime);
-      oscillator.stop(startTime + duration);
-    };
+//       oscillator.start(startTime);
+//       oscillator.stop(startTime + duration);
+//     };
 
-    const now = ctx.currentTime;
-    playTone(880, now, 1.2, 0.6);
-    playTone(660, now + 0.35, 1.2, 0.5);
+//     const now = ctx.currentTime;
+//     playTone(880, now, 1.2, 0.6);
+//     playTone(660, now + 0.35, 1.2, 0.5);
 
-  } catch (e) {
-    console.warn("Bell sound error:", e);
-  }
-};
+//   } catch (e) {
+//     console.warn("Bell sound error:", e);
+//   }
+// };
 
 
-// ─── Browser Push Notification ────────────────────────────────────────────────
-const requestNotificationPermission = async () => {
-  if ("Notification" in window && Notification.permission === "default") {
-    await Notification.requestPermission();
-  }
-};
+// // ─── Browser Push Notification ────────────────────────────────────────────────
+// const requestNotificationPermission = async () => {
+//   if ("Notification" in window && Notification.permission === "default") {
+//     await Notification.requestPermission();
+//   }
+// };
 
-const showBrowserNotification = (title, body) => {
-  if ("Notification" in window && Notification.permission === "granted") {
-    if (document.visibilityState === "hidden") {
-      new Notification(title, {
-        body,
-        icon: "/favicon.ico",
-      });
-    }
-  }
-};
+// const showBrowserNotification = (title, body) => {
+//   if ("Notification" in window && Notification.permission === "granted") {
+//     if (document.visibilityState === "hidden") {
+//       new Notification(title, {
+//         body,
+//         icon: "/favicon.ico",
+//       });
+//     }
+//   }
+// };
 
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -191,7 +192,9 @@ const Notification = () => {
   const updateStatus = async (id, status, notification_id) => {
     try {
       await orderAPI.updatestatusApi(id, status);
+      stopBellForNotification(notification_id);
       await readNotification(notification_id);
+      
       setNotifications((prev) =>
         prev.filter((item) => item.id !== id)
       );
@@ -203,6 +206,7 @@ const Notification = () => {
   const readNotification = async (id) => {
     try {
       await orderAPI.readnotification(id);
+      stopBellForNotification(id); 
       setNotifications((prev) =>
         prev.filter((item) => item.notification_id !== id)
       );
@@ -272,6 +276,7 @@ const handleConfirmAccept = async (notification, deliveryBoyId) => {
       prev.filter((item) => item.id !== notification.order_id)
     );
     setOpenAcceptDialog(false);
+    stopBellForNotification(notification.notification_id);
 
   } catch (err) {
     console.error("Accept & assign error:", err);

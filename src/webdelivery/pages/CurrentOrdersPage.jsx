@@ -457,8 +457,10 @@ import FiberManualRecordRoundedIcon from "@mui/icons-material/FiberManualRecordR
 import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
 import WifiOffRoundedIcon from "@mui/icons-material/WifiOffRounded";
-import useDeliverySocket from "../hooks/useDeliverySocket";
+// import useDeliverySocket from "../hooks/useDeliverySocket";
+// import { useDeliverySocketContext } from "../context/DeliverySocketContext ";
 import ActiveOrderCard from "../components/currentorders/ActiveOrderCard";
+import useDeliverySocket from "../hooks/useDeliverySocket";
 
 const WsStatusChip = ({ status }) => {
   const config = {
@@ -583,8 +585,8 @@ const DisconnectedState = () => (
 );
 
 const CurrentOrdersPage = () => {
+  // const { activeOrder, wsStatus, acceptOrder, clearOrder } = useDeliverySocketContext();
   const { activeOrder, wsStatus, acceptOrder, clearOrder } = useDeliverySocket();
-
   // ── Snackbar state ──
   const [snackbar, setSnackbar] = useState({ open: false, message: "" });
 

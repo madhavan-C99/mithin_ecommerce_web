@@ -11,9 +11,10 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
 import FmdGoodOutlinedIcon from "@mui/icons-material/FmdGoodOutlined";
+import AddLocationAltOutlinedIcon from "@mui/icons-material/AddLocationAltOutlined";
 import { useEffect, useState } from "react";
 import { fetchAllAddresses, setDefaultAddress } from "../../api/AllApi";
-
+import AddressDialog from "../profile/AddressDialog";
 const categoryIcon = {
   home: <HomeOutlinedIcon sx={{ fontSize: 13, color: "#777" }} />,
   work: <BusinessOutlinedIcon sx={{ fontSize: 13, color: "#777" }} />,
@@ -28,6 +29,8 @@ const AddressModal = ({ open, onClose, refresh }) => {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [addOpen, setAddOpen] = useState(false); //add addreess
+
 
   useEffect(() => {
     if (!open) return;
@@ -242,9 +245,44 @@ const AddressModal = ({ open, onClose, refresh }) => {
           </RadioGroup>
         )}
       </DialogContent>
+        <DialogActions sx={{ px: { xs: 2, sm: 2.5 }, pb: 2.5, pt: 4, gap:0 ,display:"flex",justifyContent:"flex-start"}}>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<AddLocationAltOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+              onClick={() => setAddOpen(true)}
+              sx={{
+                color: "#4CAF50",
+                borderColor: "#4CAF50",
+                textTransform: "none",
+                fontSize: 13,
+                fontWeight: 600,
+                borderRadius: "8px",
+                px: 2,
+                "&:hover": { backgroundColor: "#f1f8f1", borderColor: "#388e3c" },
+                // display:"flex",
+                // justifyContent:"flex-start"
 
+              }}
+            >
+              Add Address
+            </Button>
+
+        </DialogActions>
+
+        {/* FIX 2: AddressDialog — for adding a brand new address */}
+        <AddressDialog
+          open={addOpen}
+          onClose={() => setAddOpen(false)}
+          onAddressAdded={() => {
+            setAddOpen(false);
+            refresh(); // re-fetches address + summary in CheckoutPage
+          }}
+        />
       {/* Actions */}
       <DialogActions sx={{ px: { xs: 2, sm: 2.5 }, pb: 2.5, pt: 1, gap: 1 }}>
+
+
         <Button
           onClick={onClose}
           sx={{
@@ -285,6 +323,10 @@ const AddressModal = ({ open, onClose, refresh }) => {
         </Button>
       </DialogActions>
     </Dialog>
+    
+
+
+
   );
 };
 

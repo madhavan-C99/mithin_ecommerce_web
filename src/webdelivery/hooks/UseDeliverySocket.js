@@ -137,15 +137,183 @@
 
 
 
-
-
-
 // 📁 src/webdelivery/hooks/useDeliverySocket.js
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import useDeliveryAuth from "./useDeliveryAuth";
 
 const WS_BASE = import.meta.env.VITE_WS_BASE_URL || "ws://127.0.0.1:8000";
+
+
+// bell sound function
+
+// const playClassicBell = () => {
+//   try {
+//     const AudioContext = window.AudioContext || window.webkitAudioContext;
+//     if (!AudioContext) return;
+//     const ctx = new AudioContext();
+//     const playTone = (freq, startTime, duration, gainVal) => {
+//       const oscillator = ctx.createOscillator();
+//       const gainNode = ctx.createGain();
+//       oscillator.connect(gainNode);
+//       gainNode.connect(ctx.destination);
+//       oscillator.type = "sine";
+//       oscillator.frequency.setValueAtTime(freq, startTime);
+//       gainNode.gain.setValueAtTime(gainVal, startTime);
+//       gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+//       oscillator.start(startTime);
+//       oscillator.stop(startTime + duration);
+//     };
+//     // const now = ctx.currentTime;
+//     // playTone(880, now, 1.2, 0.6);
+//     // playTone(660, now + 0.35, 1.2, 0.5);
+//     const now = ctx.currentTime;
+//   playTone(1318, now,        0.1, 0.5); // E6
+//   playTone(1567, now + 0.12, 0.1, 0.5); // G6
+//   playTone(2093, now + 0.24, 0.4, 0.6); // C7
+//   } catch (e) {
+//     console.warn("Bell sound error:", e);
+//   }
+// };
+
+// const activeBells = new Map();
+
+// export const startBellLoop = (id) => {
+//   if (activeBells.has(id)) return;
+//   playClassicBell();
+//   const intervalId = setInterval(playClassicBell, 1000);
+//   activeBells.set(id, intervalId);
+// };
+
+// export const stopBellForNotification = (id) => {
+//   if (activeBells.has(id)) {
+//     clearInterval(activeBells.get(id));
+//     activeBells.delete(id);
+//   }
+// };
+
+// export const stopAllBells = () => {
+//   activeBells.forEach((id) => clearInterval(id));
+//   activeBells.clear();
+// };
+
+// ─── Shared AudioContext — ஒரே ஒரு instance reuse பண்ணு ──────────────────────
+// ஒவ்வொரு call-லயும் புது context create பண்ணா gap வரும்
+let sharedCtx = null;
+
+const getAudioContext = () => {
+  if (!sharedCtx || sharedCtx.state === "closed") {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return null;
+    sharedCtx = new AudioContext();
+  }
+  if (sharedCtx.state === "suspended") {
+    sharedCtx.resume(); // tab switch பண்ணினா suspended ஆகும் — resume பண்ணு
+  }
+  return sharedCtx;
+};
+
+// ─── Bell Sound ───────────────────────────────────────────────────────────────
+const playClassicBell = () => {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const playTone = (freq, startTime, duration, gainVal) => {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(freq, startTime);
+      gainNode.gain.setValueAtTime(gainVal, startTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    };
+
+    const now = ctx.currentTime;
+    playTone(1318, now,        0.1, 0.5); // E6
+    playTone(1567, now + 0.12, 0.1, 0.5); // G6
+    playTone(2093, now + 0.24, 0.4, 0.6); // C7
+  } catch (e) {
+    console.warn("Bell sound error:", e);
+  }
+};
+
+// ─── Bell Loop Management ─────────────────────────────────────────────────────
+const activeBells = new Map();
+
+export const startBellLoop = (id) => {
+  if (activeBells.has(id)) return;
+  playClassicBell();
+  const intervalId = setInterval(playClassicBell, 1500); // 1.5s — tone 0.64s, gap enough
+  activeBells.set(id, intervalId);
+};
+
+export const stopBellForNotification = (id) => {
+  if (activeBells.has(id)) {
+    clearInterval(activeBells.get(id));
+    activeBells.delete(id);
+  }
+};
+
+export const stopAllBells = () => {
+  console.log("stopAllBells called, active bells:", activeBells.size);
+  activeBells.forEach((id) => clearInterval(id));
+  activeBells.clear();
+  console.log("after clear:", activeBells.size);
+};
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    // ✅ Tab போகும்போது எல்லா intervals-உம் pause பண்ணு
+    activeBells.forEach((intervalId, id) => {
+      clearInterval(intervalId);
+      activeBells.set(id, null); // null — still tracking, just paused
+    });
+  } else if (document.visibilityState === "visible") {
+    // ✅ திரும்பி வந்தா AudioContext resume + intervals restart பண்ணு
+    if (sharedCtx?.state === "suspended") {
+      sharedCtx.resume();
+    }
+    activeBells.forEach((intervalId, id) => {
+      if (intervalId === null) {
+        // paused ஆனதை மட்டும் restart பண்ணு
+        playClassicBell();
+        const newIntervalId = setInterval(playClassicBell, 1500);
+        activeBells.set(id, newIntervalId);
+      }
+    });
+  }
+});
+// ─── Browser Push Notification ────────────────────────────────────────────────
+
+// App start-ல ஒரே ஒரு முறை call பண்ணு — permission popup காட்டும்
+export const requestNotificationPermission = async () => {
+  if (!("Notification" in window)) return;
+  if (Notification.permission === "default") {
+    await Notification.requestPermission();
+  }
+};
+
+// Order வந்தா இதை call பண்ணு
+export const showBrowserNotification = (title, body) => {
+  if (!("Notification" in window)) return;
+
+  if (Notification.permission === "granted") {
+    // ✅ Permission already இருக்கு — நேரடியா show பண்ணு
+    new Notification(title, { body, icon: "/favicon.ico" });
+  } else if (Notification.permission === "default") {
+    // Permission இல்லன்னா request பண்ணிட்டு show பண்ணு
+    Notification.requestPermission().then((perm) => {
+      if (perm === "granted") {
+        new Notification(title, { body, icon: "/favicon.ico" });
+      }
+    });
+  }
+  // "denied" ஆனா ஒன்னும் பண்ண முடியாது — browser block பண்றது
+};
 
 const useDeliverySocket = () => {
   const { deliveryBoy } = useDeliveryAuth();
@@ -171,6 +339,8 @@ const useDeliverySocket = () => {
     ws.onopen = () => {
       if (!isMountedRef.current) return;
       setWsStatus("connected");
+
+      // ws.send(JSON.stringify({ action: "GET_PENDING_ORDERS" }));
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
         reconnectTimerRef.current = null;
@@ -181,9 +351,17 @@ const useDeliverySocket = () => {
       if (!isMountedRef.current) return;
       try {
         const data = JSON.parse(event.data);
+
+        if (data.action === "NEW_ORDER_REQUEST") {
+          setActiveOrder(data); // ← இதை add பண்ணுங்க
+          startBellLoop(data.order_id);
+        }
         if (data.action === "ORDER_CONFIRMED") {
 
           setActiveOrder(data);
+          // startBellLoop(data.order_id);
+
+          stopAllBells();
         }
         
 
@@ -210,12 +388,14 @@ const useDeliverySocket = () => {
       if (socketRef.current?.readyState !== WebSocket.OPEN) {
         console.warn("useDeliverySocket: cannot accept — socket not open");
         return;
+        
       }
       const message = {
         action: "Accept_Order",
         order_id,
         delivery_boy_id: deliveryBoy?.user_id,
       };
+      stopAllBells();
       socketRef.current.send(JSON.stringify(message));
     },
     [deliveryBoy?.user_id]
@@ -230,6 +410,7 @@ const useDeliverySocket = () => {
 
     return () => {
       isMountedRef.current = false;
+      // stopAllBells();
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
       if (socketRef.current) {
         socketRef.current.close();

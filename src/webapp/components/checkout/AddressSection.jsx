@@ -83,7 +83,8 @@ const AddressSection = ({ address, refresh }) => {
     categoryMeta[address?.category?.toLowerCase()] ?? categoryMeta.other;
 
   // ── NO ADDRESS STATE ──────────────────────────────────────────
-  if (!address) {
+  // if (!address) {
+  if (!address || typeof address === "string" || !address?.address_line1) {
     return (
       <>
         <Card>

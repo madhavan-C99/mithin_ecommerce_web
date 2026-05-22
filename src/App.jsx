@@ -212,6 +212,7 @@ import { FlyToCartProvider } from "./webapp/components/flytocart/FlyToCartContex
 // ✅ DELIVERY
 import { DeliveryAuthProvider } from "./webdelivery/context/DeliveryAuthContext";
 import DeliveryRoutes from "./webdelivery/routes/DeliveryRoutes";
+// import { DeliverySocketProvider } from "./webdelivery/context/DeliverySocketContext ";
 
 /* ─── AppRoutes ─────────────────────────────────────────── */
 function AppRoutes() {
@@ -266,7 +267,9 @@ function AppRoutes() {
           path={`/${deliveryPath}/*`}
           element={
             <DeliveryAuthProvider>
-              <DeliveryRoutes />
+                {/* <DeliverySocketProvider>  */}
+                  <DeliveryRoutes />
+                {/* </DeliverySocketProvider>  */}
             </DeliveryAuthProvider>
           }
         />

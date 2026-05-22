@@ -20,6 +20,7 @@ import { Outlet } from "react-router-dom";
 import AllProduct from "../../features/products/AllProduct";
 import AllCategory from "../../features/category/AllCategory";
 import AllSubCategory from "../../features/subcategory/AllSubCategory";
+import MassUpload from "../../features/massupload/MassUpload"
 import OrderPage from "../../features/ordermanagement/pages/OrderPage";
 import Notification from "../../features/notification/Notification";
 import Navbar from "./AdmNavbar";
@@ -42,8 +43,8 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import CusUser from "../../features/usermanagement/components/CusUser";
 import DashboradView from "../../features/dashborad/DashboradView";
-
-
+import BackupTableIcon from "@mui/icons-material/BackupTable";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 // minimum order page
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import MinimumOrderPage from "../../features/minimumordermanagement/pages/MinimumOrderPage";
@@ -88,6 +89,8 @@ export default function DashboardLayout() {
         { name: "Categories",   icon: <AllInboxIcon /> },
         { name: "SubCategory",  icon: <ApprovalIcon /> },
         { name: "All Products", icon: <CategoryIcon /> },
+        { name: "Mass Upload", icon: <UploadFileIcon /> },
+
       ],
     },
     { name: "Order Management", icon: <PaymentIcon /> },
@@ -126,6 +129,7 @@ export default function DashboardLayout() {
       case "Categories":       return <AllCategory />;
       case "SubCategory":      return <AllSubCategory />;
       case "All Products":     return <AllProduct />;
+      case "Mass Upload":     return <MassUpload />;
       case "Dashboard":        return <DashboradView />;
       case "Order Management": return <OrderPage />;
       case "Notifications":    return <Notification />;

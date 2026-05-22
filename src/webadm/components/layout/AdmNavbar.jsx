@@ -601,6 +601,7 @@ export default function PrimarySearchAppBar({ productname }) {
             background: n.is_read ? "#fff" : "#eef6ff",
             display: "block",
             margin: 1,
+             whiteSpace: "normal",
           }}
         >
           {/* STOCK ALERT */}
@@ -629,7 +630,12 @@ export default function PrimarySearchAppBar({ productname }) {
           {n.title === "New Order" && (
             <Box mt={1}>
               <Typography fontWeight="bold">{n.title}</Typography>
-              <Typography fontSize={14} color="text.secondary" mt={0.5}>
+              <Typography fontSize={14} color="text.secondary" mt={0.5}   sx={{
+    whiteSpace: "normal",
+    wordBreak: "break-word",
+    overflowWrap: "break-word",
+    maxWidth: "100%",
+  }}>
                 {n.message}
               </Typography>
               <Typography fontSize={12} color="text.disabled" mt={1}>
@@ -640,7 +646,12 @@ export default function PrimarySearchAppBar({ productname }) {
           {n.title === "Reassign Order" && (
             <Box mt={1}>
               <Typography fontWeight="bold">{n.title}</Typography>
-              <Typography fontSize={14} color="text.secondary" mt={0.5}>
+              <Typography fontSize={14} color="text.secondary" mt={0.5}   sx={{
+    whiteSpace: "normal",
+    wordBreak: "break-word",
+    overflowWrap: "break-word",
+    maxWidth: "100%",
+  }}>
                 {n.message}
               </Typography>
               <Typography fontSize={12} color="text.disabled" mt={1}>
